@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-PT" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Quiz interativo com backoffice de gestão de perguntas. Testa os teus conhecimentos!">
+    <title>Quiz Interativo</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ==================== CANVAS CONFETTI ==================== -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- ==================== NAVBAR ==================== -->
+    <nav class="navbar navbar-expand navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="bi bi-lightning-charge-fill me-2"></i>QuizMaster
+            </a>
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" id="nav-quiz" onclick="showSection('quiz')">
+                        <i class="bi bi-play-circle-fill me-1"></i>Quiz
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="nav-history" onclick="showSection('history')">
+                        <i class="bi bi-clock-history me-1"></i>Histórico
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="nav-backoffice" onclick="showSection('backoffice')">
+                        <i class="bi bi-gear-fill me-1"></i>Backoffice
+                    </a>
+                </li>
+                <li class="nav-item ms-2">
+                    <button class="btn btn-sm btn-theme-toggle" id="btn-theme" onclick="toggleTheme()"
+                        title="Alternar Tema">
+                        <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ==================== QUIZ SECTION ==================== -->
+    <section id="quiz-section" class="container py-5">
+
+        <!-- Start Screen -->
+        <div id="quiz-start" class="text-center fade-in">
+            <div class="hero-card mx-auto">
+                <div class="hero-icon mb-4">
+                    <i class="bi bi-patch-question-fill"></i>
+                </div>
+                <h1 class="fw-800 mb-3">Pronto para o Desafio?</h1>
+                <p class="lead text-muted mb-4">Testa os teus conhecimentos com o nosso quiz
+                    interativo.<br>Responde a todas as perguntas e vê a tua pontuação!</p>
+                <div id="quiz-meta" class="mb-4">
+                    <span class="badge bg-accent-soft me-2"><i class="bi bi-list-check me-1"></i><span
+                            id="start-question-count">0</span> perguntas disponíveis</span>
+                    <span class="badge bg-accent-soft"><i class="bi bi-trophy me-1"></i>75% para confetti!</span>
+                </div>
+
+                <!-- Category filter -->
+                <div class="mb-3">
+                    <p class="text-muted small mb-2">Categoria</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap" id="category-filter-options">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Quiz size selector -->
+                <div class="mb-4">
+                    <p class="text-muted small mb-2">Quantas perguntas queres responder?</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap" id="quiz-size-options">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <button class="btn btn-glow btn-lg px-5" onclick="startQuiz()">
+                    <i class="bi bi-rocket-takeoff-fill me-2"></i>Iniciar Quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- Question Card -->
+        <div id="quiz-question" class="d-none">
+            <div class="question-slide-container mx-auto">
+                <div class="question-card" id="question-card-inner">
+                    <!-- Timer + Progress bar -->
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="progress flex-grow-1" style="height: 8px; border-radius: 4px;">
+                            <div id="quiz-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <!-- Circular Timer -->
+                        <div class="timer-ring" id="timer-container">
+                            <svg class="timer-svg" viewBox="0 0 40 40">
+                                <circle class="timer-bg" cx="20" cy="20" r="17" />
+                                <circle class="timer-fg" cx="20" cy="20" r="17" id="timer-circle" />
+                            </svg>
+                            <span class="timer-text" id="timer-text">15</span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-accent-soft" id="question-counter">Pergunta 1 / 5</span>
+                        <span class="badge bg-accent-soft" id="score-live"><i class="bi bi-check-circle me-1"></i>0
+                            corretas</span>
+                    </div>
+                    <h4 class="fw-700 mb-4" id="question-text">Texto da pergunta</h4>
+                    <div id="options-container" class="d-grid gap-3">
+                        <!-- Options rendered by JS -->
+                    </div>
+                    <div class="text-center mt-4">
+                        <p class="text-danger small d-none" id="timeout-msg"><i class="bi bi-alarm me-1"></i>Tempo
+                            esgotado!</p>
+                        <button class="btn btn-outline-light btn-lg d-none" id="btn-next" onclick="nextQuestion()">
+                            Próxima <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Card -->
+        <div id="quiz-results" class="d-none">
+            <div class="results-card mx-auto text-center fade-in">
+                <div id="results-icon" class="results-emoji mb-3"></div>
+                <h2 class="fw-800 mb-2">Resultados</h2>
+                <p class="text-muted mb-4">Aqui está o teu desempenho:</p>
+                <div class="row g-3 mb-4 justify-content-center">
+                    <div class="col-auto">
+                        <div class="stat-box">
+                            <div class="stat-value" id="res-total">0</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="stat-box">
+                            <div class="stat-value text-success" id="res-correct">0</div>
+                            <div class="stat-label">Corretas</div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="stat-box">
+                            <div class="stat-value" id="res-percentage">0%</div>
+                            <div class="stat-label">Percentagem</div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="stat-box">
+                            <div class="stat-value" id="res-time">0s</div>
+                            <div class="stat-label">Tempo</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="fs-5 mb-4" id="res-message"></p>
+
+                <!-- Answer Review Toggle -->
+                <button class="btn btn-outline-accent btn-sm mb-3" onclick="toggleReview()" id="btn-toggle-review">
+                    <i class="bi bi-eye me-1"></i>Ver Revisão de Respostas
+                </button>
+
+                <!-- Answer Review List -->
+                <div id="review-container" class="d-none text-start mt-3">
+                    <div id="review-list">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn btn-glow btn-lg px-5" onclick="restartQuiz()">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Reiniciar Quiz
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ==================== HISTORY SECTION ==================== -->
+    <section id="history-section" class="container py-5 d-none">
+        <div class="fade-in">
+            <h2 class="fw-800 mb-1"><i class="bi bi-clock-history me-2"></i>Histórico de Resultados</h2>
+            <p class="text-muted mb-4">Os teus últimos 10 resultados de quiz.</p>
+
+            <!-- Bar Chart -->
+            <div class="card glass-card mb-4">
+                <div class="card-body">
+                    <h6 class="fw-700 mb-3">Evolução da Pontuação</h6>
+                    <div class="chart-container" id="history-chart">
+                        <p class="text-muted text-center py-4" id="chart-empty">Ainda não há resultados.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="card glass-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle" id="history-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Data</th>
+                                    <th class="text-center">Perguntas</th>
+                                    <th class="text-center">Corretas</th>
+                                    <th class="text-center">Percentagem</th>
+                                    <th class="text-center">Tempo</th>
+                                    <th class="text-center pe-4" style="width:80px">Detalhes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-history-msg" class="text-center text-muted py-5 d-none">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        Ainda não completaste nenhum quiz.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BACKOFFICE SECTION ==================== -->
+    <section id="backoffice-section" class="container py-5 d-none">
+
+        <!-- Summary + Actions -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 fade-in">
+            <div>
+                <h2 class="fw-800 mb-1"><i class="bi bi-gear-fill me-2"></i>Backoffice</h2>
+                <p class="text-muted mb-0">Gestão de perguntas do quiz — <strong id="bo-total-count">0</strong>
+                    perguntas no total</p>
+            </div>
+            <div class="d-flex gap-2 mt-2 mt-md-0">
+                <button class="btn btn-outline-accent btn-sm" onclick="showImportExport()">
+                    <i class="bi bi-arrow-left-right me-1"></i>Importar / Exportar
+                </button>
+                <button class="btn btn-glow btn-sm" onclick="openCreateForm()">
+                    <i class="bi bi-plus-lg me-1"></i>Nova Pergunta
+                </button>
+            </div>
+        </div>
+
+        <!-- Import / Export Panel -->
+        <div id="import-export-panel" class="card glass-card mb-4 d-none fade-in">
+            <div class="card-body">
+                <h5 class="fw-700 mb-3"><i class="bi bi-arrow-left-right me-2"></i>Importar / Exportar Perguntas
+                    (JSON)</h5>
+                <textarea class="form-control mb-3" id="json-textarea" rows="6"
+                    placeholder='Cole aqui o JSON das perguntas...'></textarea>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-accent btn-sm" onclick="exportQuestions()">
+                        <i class="bi bi-download me-1"></i>Exportar
+                    </button>
+                    <button class="btn btn-glow btn-sm" onclick="importQuestions()">
+                        <i class="bi bi-upload me-1"></i>Importar
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm ms-auto" onclick="hideImportExport()">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Form (Create / Edit) -->
+        <div id="question-form-container" class="card glass-card mb-4 d-none fade-in">
+            <div class="card-body">
+                <h5 class="fw-700 mb-3" id="form-title">
+                    <i class="bi bi-plus-circle me-2"></i>Nova Pergunta
+                </h5>
+                <form id="question-form" onsubmit="saveQuestion(event)">
+                    <input type="hidden" id="edit-index" value="-1">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <label for="q-text" class="form-label fw-600">Enunciado da Pergunta</label>
+                            <input type="text" class="form-control" id="q-text"
+                                placeholder="Escreve aqui o enunciado..." required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="q-category" class="form-label fw-600">Categoria</label>
+                            <input type="text" class="form-control" id="q-category" list="category-list"
+                                placeholder="Ex: Geografia" required>
+                            <datalist id="category-list">
+                                <!-- Populated by JS -->
+                            </datalist>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-600">Opção A</label>
+                            <div class="input-group">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="radio" name="correct" value="0" required>
+                                </div>
+                                <input type="text" class="form-control" id="q-opt-0" placeholder="Opção A" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-600">Opção B</label>
+                            <div class="input-group">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="radio" name="correct" value="1">
+                                </div>
+                                <input type="text" class="form-control" id="q-opt-1" placeholder="Opção B" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-600">Opção C</label>
+                            <div class="input-group">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="radio" name="correct" value="2">
+                                </div>
+                                <input type="text" class="form-control" id="q-opt-2" placeholder="Opção C" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-600">Opção D</label>
+                            <div class="input-group">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0" type="radio" name="correct" value="3">
+                                </div>
+                                <input type="text" class="form-control" id="q-opt-3" placeholder="Opção D" required>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-3"><i class="bi bi-info-circle me-1"></i>Seleciona o botão de rádio ao
+                        lado da opção correta.</p>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-glow btn-sm">
+                            <i class="bi bi-check-lg me-1"></i>Gravar
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="cancelForm()">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Questions Table -->
+        <div class="card glass-card fade-in">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 align-middle" id="questions-table">
+                        <thead>
+                            <tr>
+                                <th class="ps-4" style="width:50px">#</th>
+                                <th>Enunciado</th>
+                                <th class="text-center" style="width:130px">Categoria</th>
+                                <th class="text-center" style="width:100px">Correta</th>
+                                <th class="text-end pe-4" style="width:180px">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questions-tbody">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-questions-msg" class="text-center text-muted py-5 d-none">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    Sem perguntas. Cria a primeira!
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ==================== DELETE CONFIRMATION MODAL ==================== -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-themed">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-700" id="deleteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Confirmar Eliminação
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Tens a certeza que queres apagar a pergunta:</p>
+                    <p class="fw-600 mt-2" id="delete-question-text" style="color: var(--accent-light);"></p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                        data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="btn-confirm-delete">
+                        <i class="bi bi-trash me-1"></i>Apagar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+
+</html>
