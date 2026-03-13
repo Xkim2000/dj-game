@@ -1,168 +1,180 @@
 /* =========================================================
    QUIZ MASTER — Main Application Logic (Enhanced)
-   ---------------------------------------------------------
-   Features:
-     • localStorage persistence for questions, history & theme
-     • Quiz flow with 15s countdown timer per question
-     • Slide animations between questions
-     • Custom quiz size (5, 10, or all questions)
-     • Answer review at the end (what you answered vs correct)
-     • Results history with bar chart (last 10 results)
-     • Light / Dark theme toggle
-     • Backoffice CRUD + Import/Export JSON
-     • Confetti animation when score >= 75%
-   
-   Convention:
-     • Variable & function names in English
-     • UI text in Portuguese (pt-PT)
-     • Questions are shuffled each time the quiz starts
    ========================================================= */
 
 // =========================================================
-// 1. DEFAULT QUESTIONS (used when localStorage is empty)
+// 1. DEFAULT QUESTIONS
 // =========================================================
-
 const DEFAULT_QUESTIONS = [
-    {
-        text: "Qual é a capital de Portugal?",
-        options: ["Madrid", "Lisboa", "Paris", "Roma"],
-        correct: 1, category: "Geografia", active: true
-    },
-    {
-        text: "Em que ano foi a Revolução dos Cravos?",
-        options: ["1970", "1974", "1980", "1986"],
-        correct: 1, category: "História", active: true
-    },
-    {
-        text: "Qual é o rio mais longo de Portugal?",
-        options: ["Douro", "Mondego", "Tejo", "Guadiana"],
-        correct: 2, category: "Geografia", active: true
-    },
-    {
-        text: "Quantos distritos tem Portugal continental?",
-        options: ["15", "18", "20", "22"],
-        correct: 1, category: "Geografia", active: true
-    },
-    {
-        text: "Qual destes é um prato típico português?",
-        options: ["Paella", "Bacalhau à Brás", "Risotto", "Croissant"],
-        correct: 1, category: "Cultura", active: true
-    },
-    {
-        text: "Quem escreveu 'Os Lusíadas'?",
-        options: ["Fernando Pessoa", "Eça de Queirós", "Luís de Camões", "José Saramago"],
-        correct: 2, category: "Cultura", active: true
-    },
-    {
-        text: "Qual é a moeda utilizada em Portugal?",
-        options: ["Escudo", "Dólar", "Euro", "Libra"],
-        correct: 2, category: "Economia", active: true
-    },
-    {
-        text: "Em que continente se situa Portugal?",
-        options: ["América", "Ásia", "África", "Europa"],
-        correct: 3, category: "Geografia", active: true
-    }
+    // ── Geografia (12 perguntas) ──────────────────────────────
+    { text: "Qual é a capital de Portugal?", options: ["Madrid", "Lisboa", "Paris", "Roma"], correct: 1, category: "Geografia", difficulty: "fácil", active: true, explanation: "Lisboa é a capital e a maior cidade de Portugal." },
+    { text: "Qual é o rio mais longo de Portugal?", options: ["Douro", "Mondego", "Tejo", "Guadiana"], correct: 2, category: "Geografia", difficulty: "médio", active: true, explanation: "O Tejo é o rio mais longo da Península Ibérica com 1007 km." },
+    { text: "Quantos distritos tem Portugal continental?", options: ["15", "18", "20", "22"], correct: 1, category: "Geografia", difficulty: "difícil", active: true, explanation: "Portugal continental tem 18 distritos." },
+    { text: "Em que continente se situa Portugal?", options: ["América", "Ásia", "África", "Europa"], correct: 3, category: "Geografia", difficulty: "fácil", active: true, explanation: "Portugal situa-se no sudoeste da Europa." },
+    { text: "Qual é o ponto mais alto de Portugal continental?", options: ["Serra do Gerês", "Serra da Estrela", "Serra de Sintra", "Serra da Arrábida"], correct: 1, category: "Geografia", difficulty: "médio", active: true, explanation: "A Serra da Estrela, com a Torre a 1993 m, é o ponto mais alto de Portugal continental." },
+    { text: "Qual é a segunda maior cidade de Portugal?", options: ["Braga", "Coimbra", "Porto", "Faro"], correct: 2, category: "Geografia", difficulty: "fácil", active: true, explanation: "O Porto é a segunda maior cidade de Portugal." },
+    { text: "Qual é o arquipélago português no Oceano Atlântico mais distante do continente?", options: ["Madeira", "Açores", "Berlengas", "Selvagens"], correct: 1, category: "Geografia", difficulty: "médio", active: true, explanation: "Os Açores situam-se a cerca de 1500 km da costa continental." },
+    { text: "Que país faz fronteira terrestre com Portugal?", options: ["França", "Marrocos", "Espanha", "Itália"], correct: 2, category: "Geografia", difficulty: "fácil", active: true, explanation: "Espanha é o único país com fronteira terrestre com Portugal." },
+    { text: "Quantas ilhas compõem o arquipélago dos Açores?", options: ["7", "9", "11", "5"], correct: 1, category: "Geografia", difficulty: "difícil", active: true, explanation: "O arquipélago dos Açores é composto por 9 ilhas." },
+    { text: "Em que rio se situa a cidade do Porto?", options: ["Tejo", "Mondego", "Douro", "Guadiana"], correct: 2, category: "Geografia", difficulty: "fácil", active: true, explanation: "A cidade do Porto situa-se na margem norte do rio Douro." },
+    { text: "Qual é o cabo mais a sudoeste da Europa continental?", options: ["Cabo da Roca", "Cabo de São Vicente", "Cabo Espichel", "Cabo Carvoeiro"], correct: 1, category: "Geografia", difficulty: "difícil", active: true, explanation: "O Cabo de São Vicente, no Algarve, é o ponto mais a sudoeste da Europa continental." },
+    { text: "Qual é a região vinícola famosa pelo Vinho do Porto?", options: ["Alentejo", "Douro", "Dão", "Bairrada"], correct: 1, category: "Geografia", difficulty: "médio", active: true, explanation: "O Vale do Douro é a região demarcada mais antiga do mundo para produção de vinho." },
+
+    // ── História (12 perguntas) ───────────────────────────────
+    { text: "Em que ano foi a Revolução dos Cravos?", options: ["1970", "1974", "1980", "1986"], correct: 1, category: "História", difficulty: "médio", active: true, explanation: "A Revolução de 25 de Abril de 1974 pôs fim ao regime ditatorial do Estado Novo." },
+    { text: "Quem foi o primeiro rei de Portugal?", options: ["D. Sancho I", "D. Afonso Henriques", "D. Dinis", "D. João I"], correct: 1, category: "História", difficulty: "fácil", active: true, explanation: "D. Afonso Henriques tornou-se o primeiro rei de Portugal em 1139." },
+    { text: "Em que ano Vasco da Gama chegou à Índia?", options: ["1492", "1498", "1500", "1510"], correct: 1, category: "História", difficulty: "médio", active: true, explanation: "Vasco da Gama chegou a Calecute, na Índia, em 1498." },
+    { text: "Qual foi a última dinastia a reinar em Portugal?", options: ["Avis", "Bragança", "Borgonha", "Habsburgo"], correct: 1, category: "História", difficulty: "médio", active: true, explanation: "A dinastia de Bragança reinou de 1640 até à implantação da República em 1910." },
+    { text: "Em que ano foi implantada a República em Portugal?", options: ["1900", "1905", "1910", "1920"], correct: 2, category: "História", difficulty: "fácil", active: true, explanation: "A República Portuguesa foi proclamada a 5 de outubro de 1910." },
+    { text: "Quem liderou o regime do Estado Novo?", options: ["Humberto Delgado", "António de Oliveira Salazar", "Marcelo Caetano", "Sidónio Pais"], correct: 1, category: "História", difficulty: "fácil", active: true, explanation: "Salazar liderou o Estado Novo de 1933 até 1968." },
+    { text: "Em que ano Portugal aderiu à CEE (atual UE)?", options: ["1974", "1982", "1986", "1992"], correct: 2, category: "História", difficulty: "médio", active: true, explanation: "Portugal aderiu à Comunidade Económica Europeia a 1 de janeiro de 1986." },
+    { text: "Qual tratado estabeleceu a fronteira mais antiga da Europa?", options: ["Tratado de Tordesilhas", "Tratado de Alcanizes", "Tratado de Zamora", "Tratado de Windsor"], correct: 1, category: "História", difficulty: "difícil", active: true, explanation: "O Tratado de Alcanizes (1297) fixou a fronteira entre Portugal e Castela, a mais antiga da Europa." },
+    { text: "Em que século começaram os Descobrimentos Portugueses?", options: ["Século XIII", "Século XIV", "Século XV", "Século XVI"], correct: 2, category: "História", difficulty: "médio", active: true, explanation: "Os Descobrimentos começaram no século XV com a conquista de Ceuta em 1415." },
+    { text: "Qual batalha garantiu a independência de Portugal em 1385?", options: ["Batalha de Ourique", "Batalha de Aljubarrota", "Batalha de São Mamede", "Batalha de Alcácer Quibir"], correct: 1, category: "História", difficulty: "difícil", active: true, explanation: "A Batalha de Aljubarrota em 1385 assegurou a independência portuguesa face a Castela." },
+    { text: "Qual navegador português descobriu o Brasil?", options: ["Vasco da Gama", "Pedro Álvares Cabral", "Bartolomeu Dias", "Fernão de Magalhães"], correct: 1, category: "História", difficulty: "fácil", active: true, explanation: "Pedro Álvares Cabral chegou ao Brasil em 22 de abril de 1500." },
+    { text: "Em que ano ocorreu o terramoto de Lisboa?", options: ["1700", "1723", "1755", "1780"], correct: 2, category: "História", difficulty: "médio", active: true, explanation: "O grande terramoto de Lisboa ocorreu a 1 de novembro de 1755." },
+
+    // ── Cultura (12 perguntas) ────────────────────────────────
+    { text: "Qual destes é um prato típico português?", options: ["Paella", "Bacalhau à Brás", "Risotto", "Croissant"], correct: 1, category: "Cultura", difficulty: "fácil", active: true, explanation: "O Bacalhau à Brás é um dos pratos mais emblemáticos da cozinha portuguesa." },
+    { text: "Quem escreveu 'Os Lusíadas'?", options: ["Fernando Pessoa", "Eça de Queirós", "Luís de Camões", "José Saramago"], correct: 2, category: "Cultura", difficulty: "fácil", active: true, explanation: "Luís de Camões publicou Os Lusíadas em 1572." },
+    { text: "Qual género musical é considerado Património Imaterial da Humanidade em Portugal?", options: ["Flamenco", "Fado", "Samba", "Tango"], correct: 1, category: "Cultura", difficulty: "fácil", active: true, explanation: "O Fado foi inscrito na lista da UNESCO em 2011." },
+    { text: "Qual escritor português ganhou o Prémio Nobel da Literatura?", options: ["Fernando Pessoa", "José Saramago", "Eça de Queirós", "Sophia de Mello Breyner"], correct: 1, category: "Cultura", difficulty: "médio", active: true, explanation: "José Saramago ganhou o Nobel da Literatura em 1998." },
+    { text: "Qual é a fadista portuguesa mais internacionalmente conhecida?", options: ["Mariza", "Amália Rodrigues", "Ana Moura", "Dulce Pontes"], correct: 1, category: "Cultura", difficulty: "fácil", active: true, explanation: "Amália Rodrigues é considerada a 'Rainha do Fado'." },
+    { text: "Qual destes doces é típico de Portugal?", options: ["Cannoli", "Pastel de Nata", "Croissant", "Brownie"], correct: 1, category: "Cultura", difficulty: "fácil", active: true, explanation: "O Pastel de Nata, originário de Belém, é um ícone da pastelaria portuguesa." },
+    { text: "Que universidade portuguesa é a mais antiga?", options: ["Universidade de Lisboa", "Universidade de Coimbra", "Universidade do Porto", "Universidade de Évora"], correct: 1, category: "Cultura", difficulty: "médio", active: true, explanation: "A Universidade de Coimbra foi fundada em 1290 e é Património Mundial da UNESCO." },
+    { text: "Qual é o estilo artístico do Mosteiro dos Jerónimos?", options: ["Gótico", "Manuelino", "Barroco", "Românico"], correct: 1, category: "Cultura", difficulty: "médio", active: true, explanation: "O Mosteiro dos Jerónimos é o expoente máximo do estilo Manuelino." },
+    { text: "Que monumento de Lisboa foi construído para celebrar os Descobrimentos?", options: ["Torre de Belém", "Padrão dos Descobrimentos", "Castelo de São Jorge", "Elevador de Santa Justa"], correct: 1, category: "Cultura", difficulty: "médio", active: true, explanation: "O Padrão dos Descobrimentos foi inaugurado em 1960." },
+    { text: "Qual azulejo é mais representativo da arte portuguesa?", options: ["Azulejo verde", "Azulejo azul e branco", "Azulejo vermelho", "Azulejo dourado"], correct: 1, category: "Cultura", difficulty: "fácil", active: true, explanation: "Os azulejos azuis e brancos são um símbolo da cultura portuguesa desde o século XVI." },
+    { text: "Quem pintou os 'Painéis de São Vicente'?", options: ["Almada Negreiros", "Nuno Gonçalves", "Josefa de Óbidos", "Grão Vasco"], correct: 1, category: "Cultura", difficulty: "difícil", active: true, explanation: "Os Painéis de São Vicente são atribuídos a Nuno Gonçalves (séc. XV)." },
+    { text: "Que cidade portuguesa é famosa pela sua universidade e tradição estudantil?", options: ["Lisboa", "Porto", "Coimbra", "Braga"], correct: 2, category: "Cultura", difficulty: "fácil", active: true, explanation: "Coimbra é conhecida pela sua vida académica, com a tradição da capa e batina." },
+
+    // ── Economia (8 perguntas) ────────────────────────────────
+    { text: "Qual é a moeda utilizada em Portugal?", options: ["Escudo", "Dólar", "Euro", "Libra"], correct: 2, category: "Economia", difficulty: "fácil", active: true, explanation: "Portugal adotou o Euro em 2002." },
+    { text: "Qual é a principal indústria do Algarve?", options: ["Indústria automóvel", "Turismo", "Pesca industrial", "Tecnologia"], correct: 1, category: "Economia", difficulty: "fácil", active: true, explanation: "O turismo é a principal atividade económica do Algarve." },
+    { text: "Qual é o maior parceiro comercial de Portugal?", options: ["Brasil", "Reino Unido", "Espanha", "França"], correct: 2, category: "Economia", difficulty: "médio", active: true, explanation: "Espanha é o maior parceiro comercial de Portugal." },
+    { text: "Qual produto português é dos mais exportados no mundo?", options: ["Azeite", "Cortiça", "Vinho do Porto", "Cerâmica"], correct: 1, category: "Economia", difficulty: "médio", active: true, explanation: "Portugal é o maior exportador mundial de cortiça, responsável por mais de 50% da produção mundial." },
+    { text: "Em que ano Portugal adotou o Euro como moeda oficial?", options: ["1999", "2000", "2002", "2004"], correct: 2, category: "Economia", difficulty: "médio", active: true, explanation: "O Euro entrou em circulação em Portugal a 1 de janeiro de 2002." },
+    { text: "Qual setor económico emprega mais pessoas em Portugal?", options: ["Agricultura", "Indústria", "Serviços", "Construção"], correct: 2, category: "Economia", difficulty: "difícil", active: true, explanation: "O setor dos serviços é o que mais emprega em Portugal, representando cerca de 70% do PIB." },
+    { text: "Qual é a bolsa de valores portuguesa?", options: ["BOVESPA", "Euronext Lisboa", "IBEX", "FTSE"], correct: 1, category: "Economia", difficulty: "difícil", active: true, explanation: "A Euronext Lisboa é a bolsa de valores de Portugal." },
+    { text: "Como se chamava a antiga moeda portuguesa antes do Euro?", options: ["Peseta", "Escudo", "Real", "Cruzeiro"], correct: 1, category: "Economia", difficulty: "fácil", active: true, explanation: "O Escudo português foi a moeda oficial até à adoção do Euro." },
+
+    // ── Ciência (8 perguntas) ─────────────────────────────────
+    { text: "Qual é a fórmula química da água?", options: ["CO2", "H2O", "NaCl", "O2"], correct: 1, category: "Ciência", difficulty: "fácil", active: true, explanation: "A água é composta por dois átomos de hidrogénio e um de oxigénio: H₂O." },
+    { text: "Qual é o planeta mais próximo do Sol?", options: ["Vénus", "Mercúrio", "Marte", "Terra"], correct: 1, category: "Ciência", difficulty: "fácil", active: true, explanation: "Mercúrio é o planeta mais próximo do Sol." },
+    { text: "Quantos ossos tem o corpo humano adulto?", options: ["186", "206", "226", "256"], correct: 1, category: "Ciência", difficulty: "médio", active: true, explanation: "O corpo humano adulto tem 206 ossos." },
+    { text: "Qual é o elemento químico mais abundante no universo?", options: ["Oxigénio", "Carbono", "Hidrogénio", "Hélio"], correct: 2, category: "Ciência", difficulty: "médio", active: true, explanation: "O hidrogénio é o elemento mais abundante, representando cerca de 75% da matéria do universo." },
+    { text: "Qual é a velocidade da luz aproximada?", options: ["150 000 km/s", "300 000 km/s", "450 000 km/s", "600 000 km/s"], correct: 1, category: "Ciência", difficulty: "médio", active: true, explanation: "A luz viaja a aproximadamente 300 000 km/s no vácuo." },
+    { text: "Qual é o maior órgão do corpo humano?", options: ["Fígado", "Cérebro", "Pele", "Pulmão"], correct: 2, category: "Ciência", difficulty: "fácil", active: true, explanation: "A pele é o maior órgão do corpo humano." },
+    { text: "Qual cientista formulou a Teoria da Relatividade?", options: ["Isaac Newton", "Albert Einstein", "Niels Bohr", "Galileu Galilei"], correct: 1, category: "Ciência", difficulty: "fácil", active: true, explanation: "Albert Einstein publicou a Teoria da Relatividade Especial em 1905." },
+    { text: "Quantos cromossomas tem uma célula humana normal?", options: ["23", "44", "46", "48"], correct: 2, category: "Ciência", difficulty: "difícil", active: true, explanation: "Uma célula humana normal possui 46 cromossomas (23 pares)." },
+
+    // ── Desporto (8 perguntas) ────────────────────────────────
+    { text: "Quantas vezes Portugal ganhou o Campeonato Europeu de Futebol?", options: ["0", "1", "2", "3"], correct: 1, category: "Desporto", difficulty: "fácil", active: true, explanation: "Portugal venceu o Euro 2016 em França." },
+    { text: "Qual é o clube português com mais títulos de campeão nacional?", options: ["FC Porto", "Sporting CP", "SL Benfica", "SC Braga"], correct: 2, category: "Desporto", difficulty: "médio", active: true, explanation: "O SL Benfica é o clube com mais campeonatos nacionais em Portugal." },
+    { text: "Qual atleta português ganhou uma medalha de ouro nos Jogos Olímpicos de 2008?", options: ["Rosa Mota", "Nélson Évora", "Carlos Lopes", "Fernanda Ribeiro"], correct: 1, category: "Desporto", difficulty: "difícil", active: true, explanation: "Nélson Évora venceu o ouro no triplo salto nos Jogos de Pequim 2008." },
+    { text: "Qual foi o primeiro português a ganhar a Bola de Ouro?", options: ["Luís Figo", "Cristiano Ronaldo", "Eusébio", "Rui Costa"], correct: 2, category: "Desporto", difficulty: "médio", active: true, explanation: "Eusébio venceu a Bola de Ouro em 1965." },
+    { text: "Em que desporto se destacou Rosa Mota?", options: ["Natação", "Atletismo (Maratona)", "Ciclismo", "Judo"], correct: 1, category: "Desporto", difficulty: "fácil", active: true, explanation: "Rosa Mota ganhou o ouro olímpico na maratona em Seul 1988." },
+    { text: "Qual seleção portuguesa venceu o primeiro troféu da Liga das Nações da UEFA?", options: ["Sub-21", "Seleção A", "Seleção feminina", "Futsal"], correct: 1, category: "Desporto", difficulty: "médio", active: true, explanation: "A seleção A de Portugal venceu a primeira edição da Liga das Nações em 2019." },
+    { text: "Qual o estádio com maior capacidade em Portugal?", options: ["Estádio da Luz", "Estádio do Dragão", "Estádio José Alvalade", "Estádio de Braga"], correct: 0, category: "Desporto", difficulty: "fácil", active: true, explanation: "O Estádio da Luz, em Lisboa, tem capacidade para cerca de 65 000 espectadores." },
+    { text: "Cristiano Ronaldo nasceu em que ilha?", options: ["São Miguel", "Madeira", "Terceira", "Porto Santo"], correct: 1, category: "Desporto", difficulty: "fácil", active: true, explanation: "Cristiano Ronaldo nasceu no Funchal, na ilha da Madeira." },
+
+    // ── Tecnologia (8 perguntas) ──────────────────────────────
+    { text: "O que significa HTML?", options: ["Hyper Text Markup Language", "High Tech Modern Language", "Hyper Transfer Mail Link", "Home Tool Markup Language"], correct: 0, category: "Tecnologia", difficulty: "fácil", active: true, explanation: "HTML significa HyperText Markup Language." },
+    { text: "Quem é considerado o pai da World Wide Web?", options: ["Steve Jobs", "Bill Gates", "Tim Berners-Lee", "Mark Zuckerberg"], correct: 2, category: "Tecnologia", difficulty: "médio", active: true, explanation: "Tim Berners-Lee inventou a World Wide Web em 1989." },
+    { text: "Qual linguagem de programação foi criada por Guido van Rossum?", options: ["Java", "C++", "Python", "Ruby"], correct: 2, category: "Tecnologia", difficulty: "médio", active: true, explanation: "Python foi criada por Guido van Rossum e lançada em 1991." },
+    { text: "Qual empresa criou o sistema operativo Android?", options: ["Apple", "Microsoft", "Google", "Samsung"], correct: 2, category: "Tecnologia", difficulty: "fácil", active: true, explanation: "O Android foi desenvolvido pela Android Inc. e adquirido pela Google em 2005." },
+    { text: "O que significa CPU?", options: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Core Processing Unit"], correct: 0, category: "Tecnologia", difficulty: "fácil", active: true, explanation: "CPU significa Central Processing Unit (Unidade Central de Processamento)." },
+    { text: "Em que ano foi fundada a empresa Apple?", options: ["1974", "1976", "1980", "1984"], correct: 1, category: "Tecnologia", difficulty: "médio", active: true, explanation: "A Apple foi fundada em 1976 por Steve Jobs, Steve Wozniak e Ronald Wayne." },
+    { text: "Qual é a linguagem de programação mais usada para desenvolvimento web front-end?", options: ["Python", "Java", "JavaScript", "C#"], correct: 2, category: "Tecnologia", difficulty: "médio", active: true, explanation: "JavaScript é a linguagem essencial para desenvolvimento web no lado do cliente." },
+    { text: "Quantos bits tem um byte?", options: ["4", "6", "8", "16"], correct: 2, category: "Tecnologia", difficulty: "fácil", active: true, explanation: "Um byte é composto por 8 bits." }
 ];
 
 // =========================================================
-// 2. LOCAL STORAGE KEYS & FUNCTIONS
+// 2. LOCAL STORAGE
 // =========================================================
-
 const STORAGE_KEY = "quizmaster_questions";
 const HISTORY_KEY = "quizmaster_history";
 const THEME_KEY = "quizmaster_theme";
+const LEADERBOARD_KEY = "quizmaster_leaderboard";
 
-/**
- * Carrega as perguntas do localStorage.
- * Se não existirem dados, inicializa com as perguntas de exemplo.
- */
 function loadQuestionsFromLocalStorage() {
     const raw = localStorage.getItem(STORAGE_KEY);
+    let stored = [];
     if (raw) {
         try {
             const parsed = JSON.parse(raw);
             if (Array.isArray(parsed) && parsed.length > 0) {
-                // Migrate old questions that lack category/active fields
-                const migrated = parsed.map(q => ({
+                stored = parsed.map(q => ({
                     ...q,
                     category: q.category || "Geral",
-                    active: q.active !== undefined ? q.active : true
+                    difficulty: q.difficulty || "médio",
+                    active: q.active !== undefined ? q.active : true,
+                    explanation: q.explanation || ""
                 }));
-                return migrated;
             }
-        } catch (e) {
-            console.warn("Erro ao ler localStorage, a usar perguntas de exemplo.", e);
-        }
+        } catch (e) { console.warn("Erro ao ler localStorage", e); }
     }
-    saveQuestionsToLocalStorage(DEFAULT_QUESTIONS);
-    return [...DEFAULT_QUESTIONS];
+
+    // Merge any new DEFAULT_QUESTIONS that aren't in stored data
+    const existingTexts = new Set(stored.map(q => q.text));
+    const newDefaults = DEFAULT_QUESTIONS.filter(q => !existingTexts.has(q.text));
+    if (newDefaults.length > 0 || stored.length === 0) {
+        const merged = stored.length > 0 ? [...stored, ...newDefaults] : [...DEFAULT_QUESTIONS];
+        saveQuestionsToLocalStorage(merged);
+        return merged;
+    }
+    return stored;
 }
 
-/** Get unique categories from all questions */
 function getCategories() {
-    const cats = new Set(questions.map(q => q.category || "Geral"));
-    return [...cats].sort();
+    return [...new Set(questions.map(q => q.category || "Geral"))].sort();
 }
 
-/** Get active questions, optionally filtered by category */
-function getActiveQuestions(category) {
+function getActiveQuestions(category, difficulty) {
     return questions.filter(q => {
         if (q.active === false) return false;
-        if (category && category !== "__all__") return q.category === category;
+        if (category && category !== "__all__" && q.category !== category) return false;
+        if (difficulty && difficulty !== "__all__" && q.difficulty !== difficulty) return false;
         return true;
     });
 }
 
-/** Guarda o array de perguntas no localStorage. */
-function saveQuestionsToLocalStorage(questions) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(questions));
-}
+function saveQuestionsToLocalStorage(qs) { localStorage.setItem(STORAGE_KEY, JSON.stringify(qs)); }
 
-/** Carrega o histórico de resultados (últimos 10). */
 function loadHistory() {
-    try {
-        const raw = localStorage.getItem(HISTORY_KEY);
-        return raw ? JSON.parse(raw) : [];
-    } catch {
-        return [];
-    }
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
 }
 
-/** Guarda um novo resultado no histórico (máximo 10). */
 function saveToHistory(entry) {
     const history = loadHistory();
     history.push(entry);
-    // Keep only the last 10
     if (history.length > 10) history.shift();
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 }
 
-// =========================================================
-// 3. THEME MANAGEMENT (Light / Dark)
-// =========================================================
-
-/** Load theme from localStorage and apply it */
-function loadTheme() {
-    const saved = localStorage.getItem(THEME_KEY) || "dark";
-    applyTheme(saved);
+function loadLeaderboard() {
+    try { return JSON.parse(localStorage.getItem(LEADERBOARD_KEY)) || []; } catch { return []; }
 }
 
-/** Apply a theme */
+function saveToLeaderboard(entry) {
+    const lb = loadLeaderboard();
+    lb.push(entry);
+    lb.sort((a, b) => b.points - a.points);
+    if (lb.length > 10) lb.length = 10;
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb));
+}
+
+// =========================================================
+// 3. THEME
+// =========================================================
+function loadTheme() { applyTheme(localStorage.getItem(THEME_KEY) || "dark"); }
 function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
     const icon = document.getElementById("theme-icon");
-    if (icon) {
-        icon.className = theme === "dark"
-            ? "bi bi-moon-stars-fill"
-            : "bi bi-sun-fill";
-    }
+    if (icon) icon.className = theme === "dark" ? "bi bi-moon-stars-fill" : "bi bi-sun-fill";
 }
-
-/** Toggle between light and dark */
 function toggleTheme() {
-    const current = document.documentElement.getAttribute("data-theme") || "dark";
-    const next = current === "dark" ? "light" : "dark";
+    const next = (document.documentElement.getAttribute("data-theme") || "dark") === "dark" ? "light" : "dark";
     localStorage.setItem(THEME_KEY, next);
     applyTheme(next);
 }
@@ -170,34 +182,52 @@ function toggleTheme() {
 // =========================================================
 // 4. APPLICATION STATE
 // =========================================================
-
 let questions = [];
 let quizQuestions = [];
 let currentQuestionIndex = 0;
 let correctAnswers = 0;
 let answered = false;
-let selectedQuizSize = 0;       // 0 = all
-let selectedCategory = "__all__"; // "__all__" = todas
-let userAnswers = [];           // Track user's answers: index per question, -1 = timeout
-let quizStartTime = 0;          // Timestamp when quiz started
+let selectedQuizSize = 0;
+let selectedCategory = "__all__";
+let selectedDifficulty = "__all__";
+let userAnswers = [];
+let quizStartTime = 0;
+let totalPoints = 0;
 
-// Timer state
-const TIMER_DURATION = 15;   // seconds per question
+// Game mode: 'solo', 'duel', 'timeattack'
+let gameMode = "solo";
+let playerName = "Jogador";
+
+// Timer
+const TIMER_DURATION = 15;
 let timerInterval = null;
 let timerSeconds = TIMER_DURATION;
-const TIMER_CIRCUMFERENCE = 2 * Math.PI * 17; // r=17 from SVG
+const TIMER_CIRCUMFERENCE = 2 * Math.PI * 17;
+
+// Streak / Combo
+let currentStreak = 0;
+let maxStreak = 0;
+let comboMultiplier = 1;
+
+// Duel
+let duelPlayers = { p1: { name: "Jogador 1", correct: 0, points: 0, answers: [] }, p2: { name: "Jogador 2", correct: 0, points: 0, answers: [] } };
+let currentDuelPlayer = 1; // 1 or 2
+let duelQuestionPhase = 0; // 0 = p1 answering, 1 = p2 answering
+
+// Time Attack
+const TIME_ATTACK_DURATION = 60;
+let globalTimerInterval = null;
+let globalTimerSeconds = TIME_ATTACK_DURATION;
 
 // =========================================================
 // 5. INITIALIZATION
 // =========================================================
-
 document.addEventListener("DOMContentLoaded", () => {
     loadTheme();
     questions = loadQuestionsFromLocalStorage();
     renderBackofficeTable();
     updateStartScreen();
 
-    // Wire up delete confirmation button
     document.getElementById("btn-confirm-delete").addEventListener("click", () => {
         if (pendingDeleteIndex >= 0 && pendingDeleteIndex < questions.length) {
             questions.splice(pendingDeleteIndex, 1);
@@ -212,104 +242,107 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // =========================================================
-// 6. NAVIGATION (Quiz / History / Backoffice)
+// 6. NAVIGATION (with transitions)
 // =========================================================
-
 function showSection(section) {
-    const sections = ["quiz", "history", "backoffice"];
+    const sections = ["quiz", "history", "ranking", "backoffice"];
+    const currentVisible = sections.find(s => {
+        const el = document.getElementById(`${s}-section`);
+        return el && !el.classList.contains("section-hidden");
+    });
+
     sections.forEach(s => {
         const el = document.getElementById(`${s}-section`);
         const nav = document.getElementById(`nav-${s}`);
         if (s === section) {
-            el.classList.remove("d-none");
-            nav.classList.add("active");
+            el.classList.remove("section-hidden");
+            el.classList.add("section-fade-in");
+            setTimeout(() => el.classList.remove("section-fade-in"), 400);
+            if (nav) nav.classList.add("active");
         } else {
-            el.classList.add("d-none");
-            nav.classList.remove("active");
+            el.classList.add("section-hidden");
+            if (nav) nav.classList.remove("active");
         }
     });
 
-    if (section === "quiz") {
-        stopTimer();
-        resetQuizView();
-    } else if (section === "backoffice") {
-        questions = loadQuestionsFromLocalStorage();
-        renderBackofficeTable();
-    } else if (section === "history") {
-        renderHistory();
+    if (section === "quiz") { stopTimer(); stopGlobalTimer(); resetQuizView(); }
+    else if (section === "backoffice") { questions = loadQuestionsFromLocalStorage(); renderBackofficeTable(); }
+    else if (section === "history") { renderHistory(); }
+    else if (section === "ranking") { renderLeaderboard(); }
+}
+
+// =========================================================
+// 7. GAME MODE SELECTOR
+// =========================================================
+function selectGameMode(mode) {
+    gameMode = mode;
+    document.querySelectorAll("#game-mode-options .game-mode-btn").forEach(b => b.classList.remove("active"));
+    document.querySelector(`#game-mode-options .game-mode-btn[onclick="selectGameMode('${mode}')"]`).classList.add("active");
+
+    const namesInner = document.getElementById("player-names-inner");
+    if (mode === "duel") {
+        namesInner.innerHTML = `
+            <input type="text" class="player-name-input" id="player1-name" placeholder="Jogador 1..." maxlength="20">
+            <span class="text-muted fw-700">VS</span>
+            <input type="text" class="player-name-input" id="player2-name" placeholder="Jogador 2..." maxlength="20">`;
+    } else {
+        namesInner.innerHTML = `<input type="text" class="player-name-input" id="player1-name" placeholder="O teu nome..." maxlength="20">`;
     }
 }
 
 // =========================================================
-// 7. QUIZ — START SCREEN & SIZE SELECTOR
+// 8. START SCREEN
 // =========================================================
-
 function updateStartScreen() {
-    // Reset filters
     selectedCategory = "__all__";
+    selectedDifficulty = "__all__";
     selectedQuizSize = 0;
 
-    // Render category filter
+    // Category filter
     const catContainer = document.getElementById("category-filter-options");
     catContainer.innerHTML = "";
     const categories = getCategories();
-
-    // "Todas" button
-    const allBtn = document.createElement("button");
-    allBtn.type = "button";
-    allBtn.className = "quiz-size-btn active";
-    allBtn.textContent = "Todas";
-    allBtn.onclick = () => {
-        selectedCategory = "__all__";
-        catContainer.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active"));
-        allBtn.classList.add("active");
-        refreshQuizCount();
-    };
-    catContainer.appendChild(allBtn);
-
+    const allCatBtn = document.createElement("button");
+    allCatBtn.type = "button"; allCatBtn.className = "quiz-size-btn active"; allCatBtn.textContent = "Todas";
+    allCatBtn.onclick = () => { selectedCategory = "__all__"; catContainer.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active")); allCatBtn.classList.add("active"); refreshQuizCount(); };
+    catContainer.appendChild(allCatBtn);
     categories.forEach(cat => {
         const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "quiz-size-btn";
-        btn.textContent = cat;
-        btn.onclick = () => {
-            selectedCategory = cat;
-            catContainer.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            refreshQuizCount();
-        };
+        btn.type = "button"; btn.className = "quiz-size-btn"; btn.textContent = cat;
+        btn.onclick = () => { selectedCategory = cat; catContainer.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); refreshQuizCount(); };
         catContainer.appendChild(btn);
+    });
+
+    // Difficulty filter
+    const diffContainer = document.getElementById("difficulty-filter-options");
+    diffContainer.innerHTML = "";
+    const diffs = [{ val: "__all__", label: "Todas" }, { val: "fácil", label: "🟢 Fácil" }, { val: "médio", label: "🟡 Médio" }, { val: "difícil", label: "🔴 Difícil" }];
+    diffs.forEach((d, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button"; btn.className = "quiz-size-btn" + (i === 0 ? " active" : ""); btn.textContent = d.label;
+        btn.onclick = () => { selectedDifficulty = d.val; diffContainer.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); refreshQuizCount(); };
+        diffContainer.appendChild(btn);
     });
 
     refreshQuizCount();
 }
 
-/** Refresh the available question count and size selector based on category filter */
 function refreshQuizCount() {
-    const available = getActiveQuestions(selectedCategory);
+    const available = getActiveQuestions(selectedCategory, selectedDifficulty);
     const total = available.length;
     document.getElementById("start-question-count").textContent = total;
-
-    // Render quiz size options
     const container = document.getElementById("quiz-size-options");
     container.innerHTML = "";
     selectedQuizSize = 0;
-
     const sizes = [];
     if (total >= 5) sizes.push(5);
     if (total >= 10) sizes.push(10);
     sizes.push(0);
-
     sizes.forEach(size => {
         const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "quiz-size-btn" + (size === 0 ? " active" : "");
+        btn.type = "button"; btn.className = "quiz-size-btn" + (size === 0 ? " active" : "");
         btn.textContent = size === 0 ? `Todas (${total})` : `${size} perguntas`;
-        btn.onclick = () => {
-            selectedQuizSize = size;
-            container.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-        };
+        btn.onclick = () => { selectedQuizSize = size; container.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); };
         container.appendChild(btn);
     });
 }
@@ -318,15 +351,15 @@ function resetQuizView() {
     document.getElementById("quiz-start").classList.remove("d-none");
     document.getElementById("quiz-question").classList.add("d-none");
     document.getElementById("quiz-results").classList.add("d-none");
+    document.getElementById("duel-results").classList.add("d-none");
+    document.getElementById("duel-handoff").classList.add("d-none");
     questions = loadQuestionsFromLocalStorage();
     updateStartScreen();
 }
 
 // =========================================================
-// 8. QUIZ — CORE LOGIC
+// 9. QUIZ CORE
 // =========================================================
-
-/** Shuffle array using Fisher-Yates algorithm */
 function shuffleArray(arr) {
     const copy = [...arr];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -336,90 +369,146 @@ function shuffleArray(arr) {
     return copy;
 }
 
-/** Start a new quiz session */
+function getDifficultyMultiplier(diff) {
+    if (diff === "fácil") return 1;
+    if (diff === "difícil") return 3;
+    return 2; // médio
+}
+
+function getDiffBadgeClass(diff) {
+    if (diff === "fácil") return "badge-diff-facil";
+    if (diff === "difícil") return "badge-diff-dificil";
+    return "badge-diff-medio";
+}
+
+function getDiffLabel(diff) {
+    if (diff === "fácil") return "🟢 Fácil";
+    if (diff === "difícil") return "🔴 Difícil";
+    return "🟡 Médio";
+}
+
 function startQuiz() {
     questions = loadQuestionsFromLocalStorage();
+    let pool = getActiveQuestions(selectedCategory, selectedDifficulty);
+    if (pool.length === 0) { alert("Não existem perguntas ativas! Adiciona ou ativa perguntas no Backoffice."); return; }
 
-    if (questions.length === 0) {
-        alert("Não existem perguntas! Adiciona perguntas no Backoffice.");
-        return;
-    }
-
-    // Get only active questions for selected category
-    let pool = getActiveQuestions(selectedCategory);
-
-    if (pool.length === 0) {
-        alert("Não existem perguntas ativas para esta categoria! Ativa perguntas no Backoffice.");
-        return;
-    }
-
-    // Shuffle and slice to selected size
     let shuffled = shuffleArray(pool);
-    if (selectedQuizSize > 0 && selectedQuizSize < shuffled.length) {
-        shuffled = shuffled.slice(0, selectedQuizSize);
-    }
+    if (selectedQuizSize > 0 && selectedQuizSize < shuffled.length) shuffled = shuffled.slice(0, selectedQuizSize);
 
     quizQuestions = shuffled;
     currentQuestionIndex = 0;
     correctAnswers = 0;
     answered = false;
     userAnswers = [];
+    totalPoints = 0;
+    currentStreak = 0;
+    maxStreak = 0;
+    comboMultiplier = 1;
     quizStartTime = Date.now();
+
+    // Player names
+    const p1Input = document.getElementById("player1-name");
+    playerName = (p1Input && p1Input.value.trim()) || "Jogador";
+
+    // Duel setup
+    if (gameMode === "duel") {
+        const p2Input = document.getElementById("player2-name");
+        duelPlayers = {
+            p1: { name: playerName || "Jogador 1", correct: 0, points: 0, answers: [], streak: 0 },
+            p2: { name: (p2Input && p2Input.value.trim()) || "Jogador 2", correct: 0, points: 0, answers: [], streak: 0 }
+        };
+        currentDuelPlayer = 1;
+        duelQuestionPhase = 0;
+        document.getElementById("duel-turn-container").classList.remove("d-none");
+    } else {
+        document.getElementById("duel-turn-container").classList.add("d-none");
+    }
 
     document.getElementById("quiz-start").classList.add("d-none");
     document.getElementById("quiz-results").classList.add("d-none");
+    document.getElementById("duel-results").classList.add("d-none");
     document.getElementById("quiz-question").classList.remove("d-none");
+
+    // Points badge
+    document.getElementById("points-live").classList.remove("d-none");
+
+    // Timer setup based on mode
+    if (gameMode === "timeattack") {
+        document.getElementById("timer-container").classList.add("d-none");
+        document.getElementById("global-timer-container").classList.remove("d-none");
+        globalTimerSeconds = TIME_ATTACK_DURATION;
+        startGlobalTimer();
+    } else {
+        document.getElementById("timer-container").classList.remove("d-none");
+        document.getElementById("global-timer-container").classList.add("d-none");
+    }
 
     renderQuestion();
 }
 
-/** Render the current question with slide-in animation */
 function renderQuestion() {
     const q = quizQuestions[currentQuestionIndex];
     const total = quizQuestions.length;
     const card = document.getElementById("question-card-inner");
 
+    // Duel turn
+    if (gameMode === "duel") {
+        const turnName = currentDuelPlayer === 1 ? duelPlayers.p1.name : duelPlayers.p2.name;
+        document.getElementById("duel-turn-name").textContent = turnName;
+        document.getElementById("duel-turn-container").classList.remove("d-none");
+    }
+
     // Counter & progress
-    document.getElementById("question-counter").textContent =
-        `Pergunta ${currentQuestionIndex + 1} / ${total}`;
-    document.getElementById("score-live").innerHTML =
-        `<i class="bi bi-check-circle me-1"></i>${correctAnswers} correta${correctAnswers !== 1 ? 's' : ''}`;
+    const qNum = gameMode === "duel" ? Math.floor(currentQuestionIndex / 1) + 1 : currentQuestionIndex + 1;
+    document.getElementById("question-counter").textContent = `Pergunta ${currentQuestionIndex + 1} / ${total}`;
+
+    const currentPts = gameMode === "duel" ? (currentDuelPlayer === 1 ? duelPlayers.p1.points : duelPlayers.p2.points) : totalPoints;
+    const currentCorrect = gameMode === "duel" ? (currentDuelPlayer === 1 ? duelPlayers.p1.correct : duelPlayers.p2.correct) : correctAnswers;
+
+    document.getElementById("score-live").innerHTML = `<i class="bi bi-check-circle me-1"></i>${currentCorrect} correta${currentCorrect !== 1 ? 's' : ''}`;
+    document.getElementById("points-live").innerHTML = `<i class="bi bi-star-fill me-1"></i>${currentPts} pts`;
 
     const progressPct = (currentQuestionIndex / total) * 100;
     document.getElementById("quiz-progress").style.width = progressPct + "%";
 
+    // Difficulty badge
+    const diffBadge = document.getElementById("question-diff-badge");
+    diffBadge.className = `badge ${getDiffBadgeClass(q.difficulty || "médio")}`;
+    diffBadge.textContent = getDiffLabel(q.difficulty || "médio");
+
     // Question text
     document.getElementById("question-text").textContent = q.text;
 
-    // Render options
+    // Options
     const container = document.getElementById("options-container");
     container.innerHTML = "";
     const letters = ["A", "B", "C", "D"];
-
     q.options.forEach((opt, i) => {
         const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "option-btn";
-        btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt}</span>`;
+        btn.type = "button"; btn.className = "option-btn";
+        btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${escapeHtml(opt)}</span>`;
         btn.onclick = () => selectAnswer(i);
         container.appendChild(btn);
     });
 
-    // Hide next button & timeout message
+    // Hide elements
     document.getElementById("btn-next").classList.add("d-none");
     document.getElementById("timeout-msg").classList.add("d-none");
+    document.getElementById("explanation-box").classList.add("d-none");
     answered = false;
 
-    // Slide-in animation
+    // Streak badge
+    updateStreakBadge();
+
+    // Slide animation
     card.classList.remove("slide-in-right", "slide-out-left");
     void card.offsetWidth;
     card.classList.add("slide-in-right");
 
-    // Start the timer
-    startTimer();
+    // Timer
+    if (gameMode !== "timeattack") startTimer();
 }
 
-/** Register user's answer */
 function selectAnswer(selectedIndex) {
     if (answered) return;
     answered = true;
@@ -428,754 +517,252 @@ function selectAnswer(selectedIndex) {
     const q = quizQuestions[currentQuestionIndex];
     const buttons = document.querySelectorAll("#options-container .option-btn");
     const isCorrect = selectedIndex === q.correct;
+    const diffMult = getDifficultyMultiplier(q.difficulty || "médio");
 
-    // Track answer
-    userAnswers.push(selectedIndex);
-
-    if (isCorrect) {
-        correctAnswers++;
-        document.getElementById("score-live").innerHTML =
-            `<i class="bi bi-check-circle me-1"></i>${correctAnswers} correta${correctAnswers !== 1 ? 's' : ''}`;
+    if (gameMode === "duel") {
+        const player = currentDuelPlayer === 1 ? duelPlayers.p1 : duelPlayers.p2;
+        player.answers.push(selectedIndex);
+        if (isCorrect) {
+            player.correct++;
+            player.streak = (player.streak || 0) + 1;
+            let combo = 1;
+            if (player.streak >= 5) combo = 3;
+            else if (player.streak >= 3) combo = 2;
+            const pts = 100 * diffMult * combo;
+            player.points += pts;
+            if (combo > 1) showCombo(combo);
+        } else {
+            player.streak = 0;
+        }
+        // Update live display
+        document.getElementById("score-live").innerHTML = `<i class="bi bi-check-circle me-1"></i>${player.correct} correta${player.correct !== 1 ? 's' : ''}`;
+        document.getElementById("points-live").innerHTML = `<i class="bi bi-star-fill me-1"></i>${player.points} pts`;
+    } else {
+        userAnswers.push(selectedIndex);
+        if (isCorrect) {
+            correctAnswers++;
+            currentStreak++;
+            if (currentStreak > maxStreak) maxStreak = currentStreak;
+            // Combo calc
+            if (currentStreak >= 5) comboMultiplier = 3;
+            else if (currentStreak >= 3) comboMultiplier = 2;
+            else comboMultiplier = 1;
+            const pts = 100 * diffMult * comboMultiplier;
+            totalPoints += pts;
+            if (comboMultiplier > 1) showCombo(comboMultiplier);
+            document.getElementById("score-live").innerHTML = `<i class="bi bi-check-circle me-1"></i>${correctAnswers} correta${correctAnswers !== 1 ? 's' : ''}`;
+        } else {
+            currentStreak = 0;
+            comboMultiplier = 1;
+            userAnswers[userAnswers.length - 1] = selectedIndex;
+        }
+        document.getElementById("points-live").innerHTML = `<i class="bi bi-star-fill me-1"></i>${totalPoints} pts`;
     }
 
-    // Highlight buttons
-    buttons.forEach((btn, i) => {
-        btn.disabled = true;
-        if (i === q.correct) {
-            btn.classList.add("correct");
-        } else if (i === selectedIndex && !isCorrect) {
-            btn.classList.add("wrong");
-        }
-    });
+    updateStreakBadge();
 
-    showNextButton();
+    // Highlight buttons — in duel mode for Player 1, only show personal feedback
+    if (gameMode === "duel" && currentDuelPlayer === 1) {
+        buttons.forEach((btn, i) => {
+            btn.disabled = true;
+            if (i === selectedIndex) {
+                btn.classList.add(isCorrect ? "duel-selected-correct" : "duel-selected-wrong");
+            }
+        });
+        // Do NOT show explanation or correct answer for Player 1
+        // Auto-transition to handoff after brief feedback
+        setTimeout(() => showHandoff(2), 1200);
+    } else {
+        // Normal feedback: show correct answer + wrong answer
+        buttons.forEach((btn, i) => {
+            btn.disabled = true;
+            if (i === q.correct) btn.classList.add("correct");
+            else if (i === selectedIndex && !isCorrect) btn.classList.add("wrong");
+        });
+
+        // Show explanation
+        if (q.explanation) {
+            document.getElementById("explanation-text").textContent = q.explanation;
+            document.getElementById("explanation-box").classList.remove("d-none");
+        }
+
+        if (gameMode === "timeattack") {
+            setTimeout(() => nextQuestion(), 800);
+        } else {
+            showNextButton();
+        }
+    }
 }
 
-/** Handle timeout — no answer given */
 function handleTimeout() {
     if (answered) return;
     answered = true;
     stopTimer();
 
-    userAnswers.push(-1); // -1 = timeout
+    if (gameMode === "duel") {
+        const player = currentDuelPlayer === 1 ? duelPlayers.p1 : duelPlayers.p2;
+        player.answers.push(-1);
+        player.streak = 0;
+    } else {
+        userAnswers.push(-1);
+        currentStreak = 0;
+        comboMultiplier = 1;
+    }
 
+    updateStreakBadge();
     const q = quizQuestions[currentQuestionIndex];
     const buttons = document.querySelectorAll("#options-container .option-btn");
 
-    buttons.forEach((btn, i) => {
-        btn.disabled = true;
-        if (i === q.correct) {
-            btn.classList.add("correct");
-        }
-    });
-
-    // Show timeout message
-    document.getElementById("timeout-msg").classList.remove("d-none");
-
-    showNextButton();
-}
-
-/** Show the next / results button */
-function showNextButton() {
-    const btnNext = document.getElementById("btn-next");
-    btnNext.classList.remove("d-none");
-
-    if (currentQuestionIndex >= quizQuestions.length - 1) {
-        btnNext.innerHTML = 'Ver Resultados <i class="bi bi-trophy ms-1"></i>';
+    if (gameMode === "duel" && currentDuelPlayer === 1) {
+        // Player 1 timeout — don't reveal correct answer
+        buttons.forEach((btn, i) => { btn.disabled = true; });
+        document.getElementById("timeout-msg").classList.remove("d-none");
+        setTimeout(() => showHandoff(2), 1200);
     } else {
-        btnNext.innerHTML = 'Próxima <i class="bi bi-arrow-right ms-1"></i>';
+        // Normal timeout — show correct answer
+        buttons.forEach((btn, i) => { btn.disabled = true; if (i === q.correct) btn.classList.add("correct"); });
+
+        if (q.explanation) {
+            document.getElementById("explanation-text").textContent = q.explanation;
+            document.getElementById("explanation-box").classList.remove("d-none");
+        }
+
+        document.getElementById("timeout-msg").classList.remove("d-none");
+
+        if (gameMode === "timeattack") setTimeout(() => nextQuestion(), 800);
+        else showNextButton();
     }
 }
 
-/** Advance to next question with slide animation */
+function showNextButton() {
+    const btnNext = document.getElementById("btn-next");
+    btnNext.classList.remove("d-none");
+    const isLast = gameMode === "duel"
+        ? (currentQuestionIndex >= quizQuestions.length - 1 && currentDuelPlayer === 2)
+        : (currentQuestionIndex >= quizQuestions.length - 1);
+    btnNext.innerHTML = isLast ? 'Ver Resultados <i class="bi bi-trophy ms-1"></i>' : 'Próxima <i class="bi bi-arrow-right ms-1"></i>';
+}
+
 function nextQuestion() {
     const card = document.getElementById("question-card-inner");
-
-    // Slide out
     card.classList.remove("slide-in-right");
     card.classList.add("slide-out-left");
 
-    // After animation, render next
     setTimeout(() => {
-        currentQuestionIndex++;
-        if (currentQuestionIndex >= quizQuestions.length) {
-            showResults();
+        if (gameMode === "duel") {
+            if (currentDuelPlayer === 2) {
+                // Both answered this question, move to next
+                currentQuestionIndex++;
+                if (currentQuestionIndex >= quizQuestions.length) showResults();
+                else showHandoff(1); // Hand off to Player 1 for next question
+            } else {
+                // Solo player in duel somehow — shouldn't happen but fallback
+                currentQuestionIndex++;
+                if (currentQuestionIndex >= quizQuestions.length) showResults();
+                else renderQuestion();
+            }
         } else {
-            renderQuestion();
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= quizQuestions.length) showResults();
+            else renderQuestion();
         }
     }, 280);
 }
 
 // =========================================================
-// 9. TIMER (15s countdown per question)
+// DUEL HANDOFF
 // =========================================================
+let handoffTargetPlayer = 2;
 
+function showHandoff(targetPlayer) {
+    handoffTargetPlayer = targetPlayer;
+    const handoffName = targetPlayer === 1 ? duelPlayers.p1.name : duelPlayers.p2.name;
+
+    document.getElementById("duel-handoff-name").textContent = handoffName;
+    document.getElementById("duel-handoff-text").textContent = `É a vez de:`;
+    document.getElementById("duel-handoff").classList.remove("d-none");
+    document.getElementById("quiz-question").classList.add("d-none");
+}
+
+function dismissHandoff() {
+    document.getElementById("duel-handoff").classList.add("d-none");
+    document.getElementById("quiz-question").classList.remove("d-none");
+
+    currentDuelPlayer = handoffTargetPlayer;
+    renderQuestion();
+}
+
+// =========================================================
+// 10. STREAK / COMBO
+// =========================================================
+function updateStreakBadge() {
+    const badge = document.getElementById("streak-badge");
+    const count = document.getElementById("streak-count");
+    const streak = gameMode === "duel" ? (currentDuelPlayer === 1 ? duelPlayers.p1.streak : duelPlayers.p2.streak) || 0 : currentStreak;
+
+    if (streak >= 2) {
+        badge.classList.remove("d-none");
+        count.textContent = streak;
+    } else {
+        badge.classList.add("d-none");
+    }
+}
+
+function showCombo(multiplier) {
+    const overlay = document.getElementById("combo-overlay");
+    overlay.textContent = `🔥 Combo x${multiplier}!`;
+    overlay.classList.remove("show");
+    void overlay.offsetWidth;
+    overlay.classList.add("show");
+    setTimeout(() => overlay.classList.remove("show"), 1200);
+}
+
+// =========================================================
+// 11. TIMERS
+// =========================================================
 function startTimer() {
     stopTimer();
     timerSeconds = TIMER_DURATION;
     updateTimerDisplay();
-
     timerInterval = setInterval(() => {
         timerSeconds--;
         updateTimerDisplay();
-
-        if (timerSeconds <= 0) {
-            stopTimer();
-            handleTimeout();
-        }
+        if (timerSeconds <= 0) { stopTimer(); handleTimeout(); }
     }, 1000);
 }
 
-function stopTimer() {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-}
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
 
 function updateTimerDisplay() {
     const circle = document.getElementById("timer-circle");
     const text = document.getElementById("timer-text");
-
     if (!circle || !text) return;
-
     text.textContent = timerSeconds;
-
-    // Calculate stroke offset (full circle = TIMER_CIRCUMFERENCE)
     const fraction = timerSeconds / TIMER_DURATION;
-    const offset = TIMER_CIRCUMFERENCE * (1 - fraction);
-    circle.style.strokeDashoffset = offset;
-
-    // Color change based on remaining time
+    circle.style.strokeDashoffset = TIMER_CIRCUMFERENCE * (1 - fraction);
     circle.classList.remove("warning", "danger");
-    if (timerSeconds <= 5) {
-        circle.classList.add("danger");
-    } else if (timerSeconds <= 10) {
-        circle.classList.add("warning");
-    }
+    if (timerSeconds <= 5) circle.classList.add("danger");
+    else if (timerSeconds <= 10) circle.classList.add("warning");
 }
 
-// =========================================================
-// 10. RESULTS SCREEN
-// =========================================================
-
-function showResults() {
-    stopTimer();
-
-    const total = quizQuestions.length;
-    const percentage = (correctAnswers / total) * 100;
-    const elapsed = Math.round((Date.now() - quizStartTime) / 1000);
-
-    document.getElementById("quiz-question").classList.add("d-none");
-    document.getElementById("quiz-results").classList.remove("d-none");
-
-    // Fill stats
-    document.getElementById("res-total").textContent = total;
-    document.getElementById("res-correct").textContent = correctAnswers;
-    document.getElementById("res-percentage").textContent = percentage.toFixed(1) + "%";
-    document.getElementById("res-time").textContent = formatTime(elapsed);
-    document.getElementById("quiz-progress").style.width = "100%";
-
-    // Build per-question details for history
-    const details = quizQuestions.map((q, i) => ({
-        text: q.text,
-        options: q.options,
-        correct: q.correct,
-        userAnswer: userAnswers[i]  // -1 = timeout, 0-3 = chosen option
-    }));
-
-    // Save to history
-    saveToHistory({
-        date: new Date().toISOString(),
-        total,
-        correct: correctAnswers,
-        percentage: parseFloat(percentage.toFixed(1)),
-        timeSpent: elapsed,
-        details
-    });
-
-    // Message and icon
-    const iconEl = document.getElementById("results-icon");
-    const msgEl = document.getElementById("res-message");
-
-    if (percentage >= 75) {
-        iconEl.textContent = "🎉";
-        msgEl.textContent = "Fantástico! Parabéns pelo excelente resultado!";
-        msgEl.className = "fs-5 mb-4 text-success";
-        launchConfetti();
-    } else if (percentage >= 50) {
-        iconEl.textContent = "👍";
-        msgEl.textContent = "Bom trabalho! Podes melhorar ainda mais.";
-        msgEl.className = "fs-5 mb-4";
-    } else {
-        iconEl.textContent = "💪";
-        msgEl.textContent = "Continua a praticar, vais conseguir!";
-        msgEl.className = "fs-5 mb-4 text-warning";
-    }
-
-    // Reset review
-    document.getElementById("review-container").classList.add("d-none");
-    document.getElementById("btn-toggle-review").innerHTML =
-        '<i class="bi bi-eye me-1"></i>Ver Revisão de Respostas';
-
-    // Render review
-    renderReview();
-
-    // Trigger fade-in
-    const card = document.querySelector(".results-card");
-    card.classList.remove("fade-in");
-    void card.offsetWidth;
-    card.classList.add("fade-in");
+function startGlobalTimer() {
+    stopGlobalTimer();
+    globalTimerSeconds = TIME_ATTACK_DURATION;
+    updateGlobalTimerDisplay();
+    globalTimerInterval = setInterval(() => {
+        globalTimerSeconds--;
+        updateGlobalTimerDisplay();
+        if (globalTimerSeconds <= 0) { stopGlobalTimer(); showResults(); }
+    }, 1000);
 }
 
-function formatTime(seconds) {
-    if (seconds < 60) return `${seconds}s`;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}m ${s}s`;
-}
-
-function restartQuiz() {
-    stopConfetti();
-    stopTimer();
-    resetQuizView();
-}
-
-// =========================================================
-// 11. ANSWER REVIEW
-// =========================================================
-
-function toggleReview() {
-    const container = document.getElementById("review-container");
-    const btn = document.getElementById("btn-toggle-review");
-
-    if (container.classList.contains("d-none")) {
-        container.classList.remove("d-none");
-        btn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Esconder Revisão';
-    } else {
-        container.classList.add("d-none");
-        btn.innerHTML = '<i class="bi bi-eye me-1"></i>Ver Revisão de Respostas';
-    }
-}
-
-function renderReview() {
-    const container = document.getElementById("review-list");
-    const letters = ["A", "B", "C", "D"];
-
-    container.innerHTML = quizQuestions.map((q, i) => {
-        const userAns = userAnswers[i];
-        const isTimeout = userAns === -1;
-        const isCorrect = userAns === q.correct;
-
-        let statusClass, icon;
-        if (isTimeout) {
-            statusClass = "review-timeout";
-            icon = '<i class="bi bi-alarm text-warning review-icon"></i>';
-        } else if (isCorrect) {
-            statusClass = "review-correct";
-            icon = '<i class="bi bi-check-circle-fill text-success review-icon"></i>';
-        } else {
-            statusClass = "review-wrong";
-            icon = '<i class="bi bi-x-circle-fill text-danger review-icon"></i>';
-        }
-
-        const userAnswer = isTimeout
-            ? '<span class="text-warning">Tempo esgotado</span>'
-            : `<span class="${isCorrect ? 'text-success' : 'text-danger'}">${letters[userAns]}) ${escapeHtml(q.options[userAns])}</span>`;
-
-        const correctAnswer = `<span class="text-success">${letters[q.correct]}) ${escapeHtml(q.options[q.correct])}</span>`;
-
-        return `
-            <div class="review-item ${statusClass}">
-                ${icon}
-                <div class="flex-grow-1">
-                    <div class="fw-600 mb-1" style="font-size:0.9rem">${i + 1}. ${escapeHtml(q.text)}</div>
-                    <div class="small">
-                        <span class="text-muted">Tua resposta:</span> ${userAnswer}
-                        ${!isCorrect ? `<br><span class="text-muted">Resposta correta:</span> ${correctAnswer}` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join("");
-}
-
-// =========================================================
-// 12. HISTORY (last 10 results + bar chart)
-// =========================================================
-
-function renderHistory() {
-    const history = loadHistory();
-    const tbody = document.getElementById("history-tbody");
-    const noMsg = document.getElementById("no-history-msg");
-    const chartEl = document.getElementById("history-chart");
-    const chartEmpty = document.getElementById("chart-empty");
-    const table = document.getElementById("history-table");
-
-    if (history.length === 0) {
-        noMsg.classList.remove("d-none");
-        table.classList.add("d-none");
-        chartEl.innerHTML = '<p class="text-muted text-center py-4">Ainda não há resultados.</p>';
-        return;
-    }
-
-    noMsg.classList.add("d-none");
-    table.classList.remove("d-none");
-
-    // Render table (most recent first)
-    tbody.innerHTML = history.slice().reverse().map((h, idx) => {
-        const realIdx = history.length - 1 - idx;
-        const date = new Date(h.date);
-        const dateStr = date.toLocaleDateString("pt-PT", {
-            day: "2-digit", month: "2-digit", year: "numeric"
-        });
-        const timeStr = date.toLocaleTimeString("pt-PT", {
-            hour: "2-digit", minute: "2-digit"
-        });
-
-        const pctClass = h.percentage >= 75 ? "text-success" :
-            h.percentage >= 50 ? "" : "text-warning";
-
-        // Build detail row content
-        let detailHtml = '';
-        if (h.details && h.details.length > 0) {
-            const letters = ["A", "B", "C", "D"];
-            detailHtml = h.details.map((d, qi) => {
-                const isTimeout = d.userAnswer === -1;
-                const isCorrect = d.userAnswer === d.correct;
-                let statusIcon, statusClass;
-                if (isTimeout) {
-                    statusIcon = '⏰';
-                    statusClass = 'text-warning';
-                } else if (isCorrect) {
-                    statusIcon = '✅';
-                    statusClass = 'text-success';
-                } else {
-                    statusIcon = '❌';
-                    statusClass = 'text-danger';
-                }
-
-                let answerLine = '';
-                if (isTimeout) {
-                    answerLine = `<span class="text-warning">Tempo esgotado</span>`;
-                } else {
-                    answerLine = `<span class="${isCorrect ? 'text-success' : 'text-danger'}">${letters[d.userAnswer]}) ${escapeHtml(d.options[d.userAnswer])}</span>`;
-                }
-
-                let correctLine = '';
-                if (!isCorrect) {
-                    correctLine = `<br><small class="text-success"><i class="bi bi-check-circle me-1"></i>Correta: ${letters[d.correct]}) ${escapeHtml(d.options[d.correct])}</small>`;
-                }
-
-                return `
-                    <div class="history-detail-item">
-                        <span class="me-2">${statusIcon}</span>
-                        <div>
-                            <strong>${qi + 1}. ${escapeHtml(d.text)}</strong><br>
-                            <small>${answerLine}${correctLine}</small>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        } else {
-            detailHtml = '<p class="text-muted small mb-0">Sem detalhes disponíveis para este quiz.</p>';
-        }
-
-        const hasDetails = h.details && h.details.length > 0;
-        const detailBtnHtml = hasDetails
-            ? `<button type="button" class="btn btn-sm btn-outline-accent" onclick="toggleHistoryDetail('hd-${realIdx}', this)" title="Ver detalhes"><i class="bi bi-eye"></i></button>`
-            : '<span class="text-muted small">—</span>';
-
-        return `
-            <tr>
-                <td class="ps-4"><span class="small">${dateStr} ${timeStr}</span></td>
-                <td class="text-center">${h.total}</td>
-                <td class="text-center">${h.correct}</td>
-                <td class="text-center ${pctClass} fw-bold">${h.percentage}%</td>
-                <td class="text-center">${formatTime(h.timeSpent)}</td>
-                <td class="text-center pe-4">${detailBtnHtml}</td>
-            </tr>
-            <tr class="history-detail-row d-none" id="hd-${realIdx}">
-                <td colspan="6" class="ps-4 pe-4 pb-3">
-                    <div class="history-detail-container">
-                        ${detailHtml}
-                    </div>
-                </td>
-            </tr>
-        `;
-    }).join("");
-
-    // Render bar chart
-    const maxPct = 100;
-    chartEl.innerHTML = history.map((h, i) => {
-        const barHeight = Math.max(4, (h.percentage / maxPct) * 130);
-        const date = new Date(h.date);
-        const label = date.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" });
-        const barColor = h.percentage >= 75 ? "var(--success)" :
-            h.percentage >= 50 ? "var(--accent)" : "var(--danger)";
-
-        return `
-            <div class="chart-bar-wrapper">
-                <span class="chart-bar-value">${h.percentage}%</span>
-                <div class="chart-bar" style="height:${barHeight}px; background:${barColor};"></div>
-                <span class="chart-bar-label">${label}</span>
-            </div>
-        `;
-    }).join("");
-}
-
-
-/** Toggle expand/collapse of history detail row */
-function toggleHistoryDetail(rowId, btn) {
-    const row = document.getElementById(rowId);
-    if (!row) return;
-    const icon = btn.querySelector("i");
-    if (row.classList.contains("d-none")) {
-        row.classList.remove("d-none");
-        if (icon) { icon.className = "bi bi-eye-slash"; }
-    } else {
-        row.classList.add("d-none");
-        if (icon) { icon.className = "bi bi-eye"; }
-    }
-}
-
-// =========================================================
-// 13. CONFETTI ANIMATION (Canvas-based)
-// =========================================================
-
-let confettiAnimationId = null;
-let confettiParticles = [];
-let confettiResizeHandler = null;
-
-function launchConfetti() {
-    stopConfetti();
-
-    const canvas = document.getElementById("confetti-canvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.style.display = "block";
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    confettiResizeHandler = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    };
-    window.addEventListener("resize", confettiResizeHandler);
-
-    const colors = ["#6c5ce7", "#a29bfe", "#00cec9", "#ff6b6b", "#fdcb6e", "#e17055", "#55efc4", "#fd79a8"];
-    confettiParticles = [];
-
-    for (let i = 0; i < 250; i++) {
-        confettiParticles.push({
-            x: Math.random() * canvas.width,
-            y: -(Math.random() * canvas.height * 1.5),
-            w: Math.random() * 10 + 4,
-            h: Math.random() * 6 + 2,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            speedY: Math.random() * 1.5 + 1,
-            speedX: (Math.random() - 0.5) * 3,
-            gravity: 0.04 + Math.random() * 0.04,
-            wobble: Math.random() * Math.PI * 2,
-            wobbleSpeed: 0.03 + Math.random() * 0.05,
-            wobbleAmplitude: 0.5 + Math.random() * 1.5,
-            rotation: Math.random() * 360,
-            rotationSpeed: (Math.random() - 0.5) * 8
-        });
-    }
-
-    let lastTime = performance.now();
-    const duration = 6000;
-    const startTime = performance.now();
-
-    function animate(now) {
-        const dt = Math.min((now - lastTime) / 16.667, 3);
-        lastTime = now;
-        const elapsed = now - startTime;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const fadeStart = duration - 2000;
-        const globalAlpha = elapsed > fadeStart
-            ? Math.max(0, 1 - (elapsed - fadeStart) / 2000)
-            : 1;
-
-        let anyVisible = false;
-
-        confettiParticles.forEach(p => {
-            p.speedY += p.gravity * dt;
-            p.y += p.speedY * dt;
-            p.wobble += p.wobbleSpeed * dt;
-            p.x += (p.speedX + Math.sin(p.wobble) * p.wobbleAmplitude) * dt;
-            p.rotation += p.rotationSpeed * dt;
-
-            if (p.y > canvas.height + 50) return;
-            anyVisible = true;
-
-            ctx.save();
-            ctx.globalAlpha = globalAlpha;
-            ctx.translate(p.x, p.y);
-            ctx.rotate((p.rotation * Math.PI) / 180);
-            ctx.fillStyle = p.color;
-            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-            ctx.restore();
-        });
-
-        if (elapsed < duration && anyVisible) {
-            confettiAnimationId = requestAnimationFrame(animate);
-        } else {
-            stopConfetti();
-        }
-    }
-
-    confettiAnimationId = requestAnimationFrame(animate);
-}
-
-function stopConfetti() {
-    if (confettiAnimationId) {
-        cancelAnimationFrame(confettiAnimationId);
-        confettiAnimationId = null;
-    }
-    const canvas = document.getElementById("confetti-canvas");
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    confettiParticles = [];
-    canvas.style.display = "none";
-
-    if (confettiResizeHandler) {
-        window.removeEventListener("resize", confettiResizeHandler);
-        confettiResizeHandler = null;
-    }
-}
-
-// =========================================================
-// 14. BACKOFFICE — TABLE RENDERING
-// =========================================================
-
-function renderBackofficeTable() {
-    const tbody = document.getElementById("questions-tbody");
-    const noMsg = document.getElementById("no-questions-msg");
-    const countEl = document.getElementById("bo-total-count");
-
-    const activeCount = questions.filter(q => q.active !== false).length;
-    countEl.textContent = `${questions.length} (${activeCount} ativas)`;
-
-    if (questions.length === 0) {
-        tbody.innerHTML = "";
-        noMsg.classList.remove("d-none");
-        document.getElementById("questions-table").classList.add("d-none");
-        return;
-    }
-
-    noMsg.classList.add("d-none");
-    document.getElementById("questions-table").classList.remove("d-none");
-
-    const letters = ["A", "B", "C", "D"];
-
-    tbody.innerHTML = questions.map((q, i) => {
-        const isActive = q.active !== false;
-        const rowClass = isActive ? "" : "row-inactive";
-        const toggleIcon = isActive
-            ? '<i class="bi bi-toggle-on text-success"></i>'
-            : '<i class="bi bi-toggle-off text-muted"></i>';
-        const toggleTitle = isActive ? "Desativar" : "Ativar";
-
-        return `
-        <tr class="${rowClass}">
-            <td class="ps-4 text-muted">${i + 1}</td>
-            <td>
-                <strong>${escapeHtml(q.text)}</strong>
-                <div class="small text-muted mt-1">
-                    ${q.options.map((o, j) =>
-            `<span class="${j === q.correct ? 'text-success fw-bold' : ''}">${letters[j]}) ${escapeHtml(o)}</span>`
-        ).join(" &nbsp;·&nbsp; ")}
-                </div>
-            </td>
-            <td class="text-center">
-                <span class="badge badge-category">${escapeHtml(q.category || 'Geral')}</span>
-            </td>
-            <td class="text-center">
-                <span class="badge bg-accent-soft">${letters[q.correct]}</span>
-            </td>
-            <td class="text-end pe-4">
-                <button type="button" class="btn-toggle-active me-1" onclick="toggleQuestionActive(${i})" title="${toggleTitle}">
-                    ${toggleIcon}
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-accent me-1" onclick="editQuestion(${i})" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteQuestion(${i})" title="Apagar">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        </tr>
-        `;
-    }).join("");
-
-    // Populate category datalist for form autocomplete
-    const datalist = document.getElementById("category-list");
-    if (datalist) {
-        datalist.innerHTML = getCategories().map(c => `<option value="${escapeHtml(c)}">`).join("");
-    }
-}
-
-function escapeHtml(str) {
-    const div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-// =========================================================
-// 15. BACKOFFICE — CREATE / EDIT / DELETE
-// =========================================================
-
-function openCreateForm() {
-    document.getElementById("form-title").innerHTML =
-        '<i class="bi bi-plus-circle me-2"></i>Nova Pergunta';
-    document.getElementById("edit-index").value = -1;
-    document.getElementById("question-form").reset();
-    document.getElementById("q-category").value = "";
-    document.getElementById("question-form-container").classList.remove("d-none");
-    document.getElementById("question-form-container").scrollIntoView({ behavior: "smooth" });
-}
-
-function editQuestion(index) {
-    const q = questions[index];
-    document.getElementById("form-title").innerHTML =
-        '<i class="bi bi-pencil me-2"></i>Editar Pergunta';
-    document.getElementById("edit-index").value = index;
-    document.getElementById("q-text").value = q.text;
-    document.getElementById("q-category").value = q.category || "Geral";
-
-    for (let i = 0; i < 4; i++) {
-        document.getElementById(`q-opt-${i}`).value = q.options[i];
-    }
-
-    const radios = document.querySelectorAll('input[name="correct"]');
-    radios.forEach((r, i) => {
-        r.checked = i === q.correct;
-    });
-
-    document.getElementById("question-form-container").classList.remove("d-none");
-    document.getElementById("question-form-container").scrollIntoView({ behavior: "smooth" });
-}
-
-function saveQuestion(event) {
-    event.preventDefault();
-
-    const text = document.getElementById("q-text").value.trim();
-    const options = [];
-    for (let i = 0; i < 4; i++) {
-        const val = document.getElementById(`q-opt-${i}`).value.trim();
-        if (!val) {
-            alert("Todas as opções devem ser preenchidas!");
-            return;
-        }
-        options.push(val);
-    }
-
-    if (!text) {
-        alert("O enunciado da pergunta não pode estar vazio!");
-        return;
-    }
-
-    const selectedRadio = document.querySelector('input[name="correct"]:checked');
-    if (!selectedRadio) {
-        alert("Seleciona qual é a opção correta!");
-        return;
-    }
-    const correct = parseInt(selectedRadio.value);
-    const category = (document.getElementById("q-category").value || "").trim() || "Geral";
-
-    const editIndex = parseInt(document.getElementById("edit-index").value);
-
-    if (editIndex >= 0) {
-        // Preserve existing active state when editing
-        const existingActive = questions[editIndex].active !== false;
-        questions[editIndex] = { text, options, correct, category, active: existingActive };
-    } else {
-        questions.push({ text, options, correct, category, active: true });
-    }
-
-    saveQuestionsToLocalStorage(questions);
-    renderBackofficeTable();
-    cancelForm();
-}
-
-let pendingDeleteIndex = -1;
-
-function deleteQuestion(index) {
-    pendingDeleteIndex = index;
-    const q = questions[index];
-    document.getElementById("delete-question-text").textContent = `"${q.text}"`;
-    const modal = new bootstrap.Modal(document.getElementById("deleteModal"));
-    modal.show();
-}
-
-/** Toggle question active/inactive state */
-function toggleQuestionActive(index) {
-    questions[index].active = !questions[index].active;
-    saveQuestionsToLocalStorage(questions);
-    renderBackofficeTable();
-}
-
-function cancelForm() {
-    document.getElementById("question-form-container").classList.add("d-none");
-    document.getElementById("question-form").reset();
-    document.getElementById("edit-index").value = -1;
-}
-
-// =========================================================
-// 16. IMPORT / EXPORT JSON
-// =========================================================
-
-function showImportExport() {
-    document.getElementById("import-export-panel").classList.remove("d-none");
-    document.getElementById("import-export-panel").scrollIntoView({ behavior: "smooth" });
-}
-
-function hideImportExport() {
-    document.getElementById("import-export-panel").classList.add("d-none");
-    document.getElementById("json-textarea").value = "";
-}
-
-function exportQuestions() {
-    const json = JSON.stringify(questions, null, 2);
-    document.getElementById("json-textarea").value = json;
-}
-
-function importQuestions() {
-    const raw = document.getElementById("json-textarea").value.trim();
-
-    if (!raw) {
-        alert("Cola o JSON das perguntas na área de texto antes de importar.");
-        return;
-    }
-
-    try {
-        const parsed = JSON.parse(raw);
-
-        if (!Array.isArray(parsed)) {
-            throw new Error("O JSON deve ser um array de perguntas.");
-        }
-
-        for (let i = 0; i < parsed.length; i++) {
-            const q = parsed[i];
-            if (!q.text || !Array.isArray(q.options) || q.options.length !== 4 || typeof q.correct !== "number") {
-                throw new Error(`Pergunta ${i + 1} tem formato inválido.`);
-            }
-            if (q.correct < 0 || q.correct > 3) {
-                throw new Error(`Pergunta ${i + 1}: índice da resposta correta deve ser entre 0 e 3.`);
-            }
-        }
-
-        questions = parsed;
-        saveQuestionsToLocalStorage(questions);
-        renderBackofficeTable();
-        hideImportExport();
-        alert(`${parsed.length} perguntas importadas com sucesso!`);
-
-    } catch (e) {
-        alert("Erro ao importar JSON:\n" + e.message);
-    }
+function stopGlobalTimer() { if (globalTimerInterval) { clearInterval(globalTimerInterval); globalTimerInterval = null; } }
+
+function updateGlobalTimerDisplay() {
+    const el = document.getElementById("global-timer-text");
+    if (!el) return;
+    el.textContent = globalTimerSeconds;
+    el.classList.remove("time-warning", "time-danger");
+    if (globalTimerSeconds <= 10) el.classList.add("time-danger");
+    else if (globalTimerSeconds <= 20) el.classList.add("time-warning");
 }
