@@ -9,6 +9,7 @@
 function showResults() {
     stopTimer();
     stopGlobalTimer();
+    window.speechSynthesis?.cancel();
 
     const total = quizQuestions.length;
     const elapsed = Math.round((Date.now() - quizStartTime) / 1000);
@@ -65,12 +66,17 @@ function showResults() {
     const iconEl = document.getElementById("results-icon");
     const msgEl = document.getElementById("res-message");
     if (percentage >= 75) {
+        playSound('combo');
         iconEl.textContent = "🎉"; msgEl.textContent = "Fantástico! Parabéns pelo excelente resultado!"; msgEl.className = "fs-5 mb-4 text-success"; launchConfetti();
     } else if (percentage >= 50) {
+        playSound('correct');
         iconEl.textContent = "👍"; msgEl.textContent = "Bom trabalho! Podes melhorar ainda mais."; msgEl.className = "fs-5 mb-4";
     } else {
+        playSound('wrong');
         iconEl.textContent = "💪"; msgEl.textContent = "Continua a praticar, vais conseguir!"; msgEl.className = "fs-5 mb-4 text-warning";
     }
+
+    speakText(`Fim do quiz. Acertaste ${correctAnswers} em ${total} perguntas. A tua pontuação é de ${totalPoints} pontos. ${msgEl.textContent}`);
 
     document.getElementById("review-container").classList.add("d-none");
     document.getElementById("btn-toggle-review").innerHTML = '<i class="bi bi-eye me-1"></i>Ver Revisão de Respostas';
@@ -81,6 +87,7 @@ function showResults() {
 }
 
 function showDuelResults(elapsed) {
+    window.speechSynthesis?.cancel();
     document.getElementById("duel-results").classList.remove("d-none");
     document.getElementById("quiz-results").classList.add("d-none");
 
@@ -107,7 +114,16 @@ function showDuelResults(elapsed) {
         msgEl.textContent = "🤝 Empate! Que batalha renhida!"; msgEl.className = "fs-5 mb-4";
     }
 
-    if (Math.max(p1.correct, p2.correct) / total >= 0.75) launchConfetti();
+    const p1ScoreTxt = `${p1.name} conseguiu ${p1.correct} certas com ${p1.points} pontos.`;
+    const p2ScoreTxt = `${p2.name} conseguiu ${p2.correct} certas com ${p2.points} pontos.`;
+    speakText(`Fim do duelo. ${p1ScoreTxt} ${p2ScoreTxt} ${msgEl.textContent}`);
+
+    if (Math.max(p1.correct, p2.correct) / total >= 0.75) {
+        playSound('combo');
+        launchConfetti();
+    } else {
+        playSound('correct');
+    }
 
     // Save to history
     const details = quizQuestions.map((q, i) => ({
@@ -131,7 +147,7 @@ function formatTime(seconds) {
     return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 }
 
-function restartQuiz() { stopConfetti(); stopTimer(); stopGlobalTimer(); resetQuizView(); }
+function restartQuiz() { playSound("click"); stopConfetti(); stopTimer(); stopGlobalTimer(); resetQuizView(); }
 
 // =========================================================
 // 13. REVIEW

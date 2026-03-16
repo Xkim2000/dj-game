@@ -69,6 +69,18 @@
                     </a>
                 </li>
                 <li class="nav-item ms-2">
+                    <button class="btn btn-sm btn-theme-toggle" id="btn-sfx" onclick="toggleSfx()"
+                        title="Efeitos Sonoros">
+                        <i class="bi bi-volume-up-fill" id="sfx-icon"></i>
+                    </button>
+                </li>
+                <li class="nav-item ms-2">
+                    <button class="btn btn-sm btn-theme-toggle" id="btn-tts" onclick="toggleTts()"
+                        title="Leitura de Voz (TTS)">
+                        <i class="bi bi-megaphone-fill" id="tts-icon"></i>
+                    </button>
+                </li>
+                <li class="nav-item ms-2">
                     <button class="btn btn-sm btn-theme-toggle" id="btn-theme" onclick="toggleTheme()"
                         title="Alternar Tema">
                         <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
@@ -209,7 +221,12 @@
                     <div class="mb-2" id="question-diff-container">
                         <span class="badge" id="question-diff-badge"></span>
                     </div>
-                    <h4 class="fw-700 mb-4" id="question-text">Texto da pergunta</h4>
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
+                        <h4 class="fw-700 mb-0" id="question-text">Texto da pergunta</h4>
+                        <button class="btn btn-sm btn-outline-secondary rounded-circle d-none" id="btn-repeat-audio" onclick="repeatAudio()" title="Ouvir Pergunta Novamente" style="flex-shrink: 0; width: 32px; height: 32px; padding: 0;">
+                            <i class="bi bi-volume-up"></i>
+                        </button>
+                    </div>
                     <div id="options-container" class="d-grid gap-3">
                         <!-- Options rendered by JS -->
                     </div>

@@ -182,6 +182,153 @@ function toggleTheme() {
 // =========================================================
 // 4. APPLICATION STATE
 // =========================================================
+const SFX_KEY = "quizmaster_sfx";
+const TTS_KEY = "quizmaster_tts";
+let sfxEnabled = true;
+let ttsEnabled = false;
+let isReading = false;
+
+// AudioManager for SFX (using AudioContext)
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+    if (!sfxEnabled || !audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    const now = audioCtx.currentTime;
+    
+    if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    } else if (type === 'wrong') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(250, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    } else if (type === 'timeout') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.4);
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+    } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.1, now + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+    } else if (type === 'combo') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.setValueAtTime(600, now + 0.1);
+        osc.frequency.setValueAtTime(800, now + 0.2);
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.2, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+    }
+}
+
+// TTS Functionality
+function speakText(text, onStart, onEnd) {
+    if (!ttsEnabled || !window.speechSynthesis) {
+        if (onEnd) onEnd();
+        return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pt-PT";
+    
+    utterance.onstart = () => {
+        isReading = true;
+        if (onStart) onStart();
+    };
+    
+    utterance.onend = () => {
+        isReading = false;
+        if (onEnd) onEnd();
+    };
+    
+    utterance.onerror = () => {
+        isReading = false;
+        if (onEnd) onEnd();
+    };
+
+    window.speechSynthesis.speak(utterance);
+}
+
+function loadAudioPreferences() {
+    sfxEnabled = localStorage.getItem(SFX_KEY) !== "false";
+    ttsEnabled = localStorage.getItem(TTS_KEY) === "true";
+    updateAudioIcons();
+}
+
+function toggleSfx() {
+    sfxEnabled = !sfxEnabled;
+    localStorage.setItem(SFX_KEY, sfxEnabled);
+    updateAudioIcons();
+    if (sfxEnabled) playSound("click");
+}
+
+function toggleTts() {
+    ttsEnabled = !ttsEnabled;
+    localStorage.setItem(TTS_KEY, ttsEnabled);
+    updateAudioIcons();
+    if (ttsEnabled) {
+        speakText("Leitura de voz ativada.");
+        const btnRepeat = document.getElementById("btn-repeat-audio");
+        if (btnRepeat && !document.getElementById("quiz-question").classList.contains("d-none")) {
+            btnRepeat.classList.remove("d-none");
+            repeatAudio();
+        }
+    } else {
+        window.speechSynthesis.cancel();
+        isReading = false;
+        const btnRepeat = document.getElementById("btn-repeat-audio");
+        if (btnRepeat) btnRepeat.classList.add("d-none");
+    }
+}
+
+function updateAudioIcons() {
+    const sfxIcon = document.getElementById("sfx-icon");
+    if (sfxIcon) sfxIcon.className = sfxEnabled ? "bi bi-volume-up-fill" : "bi bi-volume-mute-fill";
+    const ttsIcon = document.getElementById("tts-icon");
+    if (ttsIcon) ttsIcon.className = ttsEnabled ? "bi bi-megaphone-fill" : "bi bi-megaphone";
+}
+
+function repeatAudio() {
+    if (!ttsEnabled) return;
+    const q = quizQuestions[currentQuestionIndex];
+    if (!q) return;
+    let textToRead = `${q.text}. `;
+    const letters = ["A", "B", "C", "D"];
+    q.options.forEach((opt, i) => {
+        textToRead += `Opção ${letters[i]}: ${opt}. `;
+    });
+    speakText(textToRead);
+}
+
 let questions = [];
 let quizQuestions = [];
 let currentQuestionIndex = 0;
@@ -193,6 +340,10 @@ let selectedDifficulty = "__all__";
 let userAnswers = [];
 let quizStartTime = 0;
 let totalPoints = 0;
+
+// Accessible Click Tracker
+let accClickCount = 0;
+let accClickTimeout = null;
 
 // Game mode: 'solo', 'duel', 'timeattack'
 let gameMode = "solo";
@@ -224,6 +375,7 @@ let globalTimerSeconds = TIME_ATTACK_DURATION;
 // =========================================================
 document.addEventListener("DOMContentLoaded", () => {
     loadTheme();
+    loadAudioPreferences();
     questions = loadQuestionsFromLocalStorage();
     renderBackofficeTable();
     updateStartScreen();
@@ -238,6 +390,30 @@ document.addEventListener("DOMContentLoaded", () => {
         const modalEl = document.getElementById("deleteModal");
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
+    });
+
+    // Accessible click listener on document for picking answers
+    document.addEventListener('click', (e) => {
+        if (document.getElementById("quiz-question").classList.contains("d-none")) return;
+        if (isReading || answered) return;
+        
+        // Ignore if clicking an option directly
+        if (e.target.closest('.option-btn') || e.target.closest('#btn-repeat-audio') || e.target.closest('.btn-theme-toggle')) return;
+
+        accClickCount++;
+        if (accClickTimeout) clearTimeout(accClickTimeout);
+        
+        playSound('click'); // Small feedback for a registered click
+
+        accClickTimeout = setTimeout(() => {
+            const index = accClickCount - 1;
+            accClickCount = 0;
+            if (index >= 0 && index <= 3) {
+                selectAnswer(index);
+            } else if (index > 3) {
+                // Ignore bursts of clicks above 4 options
+            }
+        }, 1200);
     });
 });
 
@@ -265,10 +441,10 @@ function showSection(section) {
         }
     });
 
-    if (section === "quiz") { stopTimer(); stopGlobalTimer(); resetQuizView(); }
-    else if (section === "backoffice") { questions = loadQuestionsFromLocalStorage(); renderBackofficeTable(); }
-    else if (section === "history") { renderHistory(); }
-    else if (section === "ranking") { renderLeaderboard(); }
+    if (section === "quiz") { stopTimer(); stopGlobalTimer(); resetQuizView(); window.speechSynthesis?.cancel(); }
+    else if (section === "backoffice") { questions = loadQuestionsFromLocalStorage(); renderBackofficeTable(); window.speechSynthesis?.cancel(); }
+    else if (section === "history") { renderHistory(); window.speechSynthesis?.cancel(); }
+    else if (section === "ranking") { renderLeaderboard(); window.speechSynthesis?.cancel(); }
 }
 
 // =========================================================
@@ -388,6 +564,7 @@ function getDiffLabel(diff) {
 }
 
 function startQuiz() {
+    playSound("click");
     questions = loadQuestionsFromLocalStorage();
     let pool = getActiveQuestions(selectedCategory, selectedDifficulty);
     if (pool.length === 0) { alert("Não existem perguntas ativas! Adiciona ou ativa perguntas no Backoffice."); return; }
@@ -507,10 +684,21 @@ function renderQuestion() {
 
     // Timer
     if (gameMode !== "timeattack") startTimer();
+
+    // TTS
+    const btnRepeat = document.getElementById("btn-repeat-audio");
+    if (btnRepeat) {
+        if (ttsEnabled) {
+            btnRepeat.classList.remove("d-none");
+            repeatAudio();
+        } else {
+            btnRepeat.classList.add("d-none");
+        }
+    }
 }
 
 function selectAnswer(selectedIndex) {
-    if (answered) return;
+    if (answered || isReading) return;
     answered = true;
     stopTimer();
 
@@ -537,9 +725,14 @@ function selectAnswer(selectedIndex) {
         // Update live display
         document.getElementById("score-live").innerHTML = `<i class="bi bi-check-circle me-1"></i>${player.correct} correta${player.correct !== 1 ? 's' : ''}`;
         document.getElementById("points-live").innerHTML = `<i class="bi bi-star-fill me-1"></i>${player.points} pts`;
+        
+        if (isCorrect) playSound('correct');
+        else playSound('wrong');
+        
     } else {
         userAnswers.push(selectedIndex);
         if (isCorrect) {
+            playSound('correct');
             correctAnswers++;
             currentStreak++;
             if (currentStreak > maxStreak) maxStreak = currentStreak;
@@ -552,6 +745,7 @@ function selectAnswer(selectedIndex) {
             if (comboMultiplier > 1) showCombo(comboMultiplier);
             document.getElementById("score-live").innerHTML = `<i class="bi bi-check-circle me-1"></i>${correctAnswers} correta${correctAnswers !== 1 ? 's' : ''}`;
         } else {
+            playSound('wrong');
             currentStreak = 0;
             comboMultiplier = 1;
             userAnswers[userAnswers.length - 1] = selectedIndex;
@@ -595,6 +789,7 @@ function selectAnswer(selectedIndex) {
 }
 
 function handleTimeout() {
+    playSound("timeout");
     if (answered) return;
     answered = true;
     stopTimer();
@@ -685,6 +880,7 @@ function showHandoff(targetPlayer) {
 }
 
 function dismissHandoff() {
+    playSound("click");
     document.getElementById("duel-handoff").classList.add("d-none");
     document.getElementById("quiz-question").classList.remove("d-none");
 
@@ -709,6 +905,7 @@ function updateStreakBadge() {
 }
 
 function showCombo(multiplier) {
+    playSound("combo");
     const overlay = document.getElementById("combo-overlay");
     overlay.textContent = `🔥 Combo x${multiplier}!`;
     overlay.classList.remove("show");
@@ -725,6 +922,7 @@ function startTimer() {
     timerSeconds = TIMER_DURATION;
     updateTimerDisplay();
     timerInterval = setInterval(() => {
+        if (isReading) return; // Pause timer during TTS
         timerSeconds--;
         updateTimerDisplay();
         if (timerSeconds <= 0) { stopTimer(); handleTimeout(); }
@@ -750,6 +948,7 @@ function startGlobalTimer() {
     globalTimerSeconds = TIME_ATTACK_DURATION;
     updateGlobalTimerDisplay();
     globalTimerInterval = setInterval(() => {
+        if (isReading) return; // Pause timer during TTS
         globalTimerSeconds--;
         updateGlobalTimerDisplay();
         if (globalTimerSeconds <= 0) { stopGlobalTimer(); showResults(); }
