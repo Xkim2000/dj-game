@@ -397,8 +397,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (document.getElementById("quiz-question").classList.contains("d-none")) return;
         if (isReading || answered) return;
         
-        // Ignore if clicking an option directly
-        if (e.target.closest('.option-btn') || e.target.closest('#btn-repeat-audio') || e.target.closest('.btn-theme-toggle')) return;
+        // Ignore if clicking an interactive element like a button, link, or input
+        if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) return;
 
         accClickCount++;
         if (accClickTimeout) clearTimeout(accClickTimeout);
@@ -518,9 +518,35 @@ function refreshQuizCount() {
         const btn = document.createElement("button");
         btn.type = "button"; btn.className = "quiz-size-btn" + (size === 0 ? " active" : "");
         btn.textContent = size === 0 ? `Todas (${total})` : `${size} perguntas`;
-        btn.onclick = () => { selectedQuizSize = size; container.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); };
+        btn.onclick = () => { 
+            selectedQuizSize = size; 
+            container.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active")); 
+            btn.classList.add("active"); 
+            const customInput = document.getElementById("custom-quiz-size");
+            if (customInput) customInput.value = "";
+        };
         container.appendChild(btn);
     });
+
+    const customWrapper = document.createElement("div");
+    customWrapper.className = "d-flex align-items-center ms-2";
+    customWrapper.innerHTML = `<input type="number" id="custom-quiz-size" class="form-control form-control-sm text-center" style="width: 80px; background: var(--bg-secondary); border: 1.5px solid var(--glass-border); color: var(--text-primary); border-radius: var(--radius-sm);" placeholder="Outro" min="1" max="${total}">`;
+    
+    customWrapper.querySelector('input').addEventListener('input', (e) => {
+        let val = parseInt(e.target.value);
+        if (!isNaN(val) && val > 0) {
+            if (val > total) val = total;
+            selectedQuizSize = val;
+            container.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active"));
+        } else if (!e.target.value) {
+            selectedQuizSize = 0;
+            container.querySelectorAll(".quiz-size-btn").forEach(b => b.classList.remove("active"));
+            const allBtn = container.querySelector('button:last-child');
+            if(allBtn && allBtn.textContent.includes('Todas')) allBtn.classList.add('active');
+        }
+    });
+    
+    container.appendChild(customWrapper);
 }
 
 function resetQuizView() {
